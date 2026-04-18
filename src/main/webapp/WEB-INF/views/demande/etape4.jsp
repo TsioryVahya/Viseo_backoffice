@@ -6,83 +6,100 @@
 <head>
     <meta charset="UTF-8">
     <title>Demande - Etape 4</title>
-    <jsp:include page="/WEB-INF/views/common/styles.jspf" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css">
 </head>
 <body>
-<div class="container">
-    <div class="steps">
-        <span class="step">1</span>
-        <span class="step">2</span>
-        <span class="step">3</span>
-        <span class="step active">[4]</span>
-    </div>
+<c:set var="etapeActuelle" value="${empty etapeActuelle ? 4 : etapeActuelle}" />
+<c:set var="activeMenu" value="nouvelle-demande" />
 
-    <h2>Resume et confirmation</h2>
-    <c:if test="${not empty erreurs.global}"><div class="erreur">${erreurs.global}</div></c:if>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">Viseo Backoffice</div>
+        <div class="sidebar-separator"></div>
+        <nav class="sidebar-nav">
+            <a class="sidebar-link ${activeMenu == 'nouvelle-demande' ? 'active' : ''}" href="${pageContext.request.contextPath}/demande/nouveau/etape1">Nouvelle demande</a>
+            <a class="sidebar-link" href="#">Liste des demandes</a>
+            <a class="sidebar-link" href="#">Demandeurs</a>
+        </nav>
+        <div class="sidebar-footer">v1.0 - Sprint 1</div>
+    </aside>
 
-    <div class="resume-section">
-        <h3>Informations personnelles</h3>
-        <p><strong>Nom:</strong> ${demandeur.nom}</p>
-        <p><strong>Prenom:</strong> ${demandeur.prenom}</p>
-        <p><strong>Date de naissance:</strong> <fmt:formatDate value="${dateNaissanceDate}" pattern="dd/MM/yyyy" /></p>
-        <p><strong>Lieu de naissance:</strong> ${demandeur.lieuNaissance}</p>
-        <p><strong>Telephone:</strong> ${demandeur.telephone}</p>
-        <p><strong>Email:</strong> ${demandeur.email}</p>
-        <p><strong>Adresse:</strong> ${demandeur.adresse}</p>
-        <p><strong>Nationalite:</strong> ${demandeur.nationalite.libelle}</p>
-        <p><strong>Situation familiale:</strong> ${demandeur.situationFamiliale.libelle}</p>
-    </div>
+    <main class="main-content">
+        <h1 class="page-title">Resume et confirmation</h1>
+        <p class="page-subtitle">Verifiez le dossier avant soumission definitive.</p>
+        <jsp:include page="/WEB-INF/views/common/stepper.jspf" />
+        <c:if test="${not empty erreurs.global}"><div class="erreur" style="margin-bottom: 1rem;">${erreurs.global}</div></c:if>
 
-    <div class="resume-section">
-        <h3>Passeport</h3>
-        <p><strong>Numero:</strong> ${passeport.numeroPasseport}</p>
-        <p><strong>Date delivrance:</strong> <fmt:formatDate value="${dateDelivranceDate}" pattern="dd/MM/yyyy" /></p>
-        <p><strong>Date expiration:</strong> <fmt:formatDate value="${dateExpirationDate}" pattern="dd/MM/yyyy" /></p>
-        <p><strong>Pays delivrance:</strong> ${passeport.paysDelivrance}</p>
-    </div>
+        <section class="card">
+            <h3 style="margin-top: 0;">Informations personnelles</h3>
+            <div class="resume-grid">
+                <div class="resume-label">Nom</div><div class="resume-value">${demandeur.nom}</div>
+                <div class="resume-label">Prenom</div><div class="resume-value">${demandeur.prenom}</div>
+                <div class="resume-label">Date de naissance</div><div class="resume-value"><fmt:formatDate value="${dateNaissanceDate}" pattern="dd/MM/yyyy" /></div>
+                <div class="resume-label">Lieu de naissance</div><div class="resume-value">${demandeur.lieuNaissance}</div>
+                <div class="resume-label">Telephone</div><div class="resume-value">${demandeur.telephone}</div>
+                <div class="resume-label">Email</div><div class="resume-value">${demandeur.email}</div>
+                <div class="resume-label">Adresse</div><div class="resume-value">${demandeur.adresse}</div>
+                <div class="resume-label">Nationalite</div><div class="resume-value">${demandeur.nationalite.libelle}</div>
+                <div class="resume-label">Situation familiale</div><div class="resume-value">${demandeur.situationFamiliale.libelle}</div>
+            </div>
+        </section>
 
-    <div class="resume-section">
-        <h3>Type de visa</h3>
-        <p>${typeVisa.libelle}</p>
-    </div>
+        <section class="card">
+            <h3 style="margin-top: 0;">Passeport</h3>
+            <div class="resume-grid">
+                <div class="resume-label">Numero</div><div class="resume-value">${passeport.numeroPasseport}</div>
+                <div class="resume-label">Date delivrance</div><div class="resume-value"><fmt:formatDate value="${dateDelivranceDate}" pattern="dd/MM/yyyy" /></div>
+                <div class="resume-label">Date expiration</div><div class="resume-value"><fmt:formatDate value="${dateExpirationDate}" pattern="dd/MM/yyyy" /></div>
+                <div class="resume-label">Pays delivrance</div><div class="resume-value">${passeport.paysDelivrance}</div>
+            </div>
+        </section>
 
-    <div class="resume-section">
-        <h3>Pieces communes</h3>
-        <ul>
-            <c:forEach items="${typesPiecesCommunes}" var="piece">
-                <li>
-                    <c:choose>
-                        <c:when test="${piecesCommunesSelection[piece.id]}"><span class="badge-ok">✓</span></c:when>
-                        <c:otherwise><span class="badge-ko">✗</span></c:otherwise>
-                    </c:choose>
-                    ${piece.libelle}
-                </li>
-            </c:forEach>
-        </ul>
-    </div>
+        <section class="card">
+            <h3 style="margin-top: 0;">Demande</h3>
+            <div class="resume-grid">
+                <div class="resume-label">Type de visa</div><div class="resume-value">${typeVisa.libelle}</div>
+            </div>
+        </section>
 
-    <div class="resume-section">
-        <h3>Pieces specifiques</h3>
-        <ul>
-            <c:forEach items="${typesPiecesSpecifiques}" var="piece">
-                <li>
-                    <c:choose>
-                        <c:when test="${piecesSpecifiquesSelection[piece.id]}"><span class="badge-ok">✓</span></c:when>
-                        <c:otherwise><span class="badge-ko">✗</span></c:otherwise>
-                    </c:choose>
-                    ${piece.libelle}
-                </li>
-            </c:forEach>
-            <c:if test="${empty typesPiecesSpecifiques}"><li>Aucune piece specifique.</li></c:if>
-        </ul>
-    </div>
+        <section class="card">
+            <h3 style="margin-top: 0;">Pieces communes</h3>
+            <ul style="margin: 0; padding-left: 1.1rem;">
+                <c:forEach items="${typesPiecesCommunes}" var="piece">
+                    <li style="margin-bottom: 0.4rem;">
+                        <c:choose>
+                            <c:when test="${piecesCommunesSelection[piece.id]}"><span class="status-ok">✓</span></c:when>
+                            <c:otherwise><span class="status-ko">✗</span></c:otherwise>
+                        </c:choose>
+                        ${piece.libelle}
+                    </li>
+                </c:forEach>
+            </ul>
+        </section>
 
-    <form method="post" action="${pageContext.request.contextPath}/demande/nouveau/etape4">
-        <div class="actions">
-            <a class="btn secondary" href="${pageContext.request.contextPath}/demande/nouveau/etape1">&lt;- Modifier</a>
-            <button type="submit" class="btn">Confirmer et soumettre</button>
-        </div>
-    </form>
+        <section class="card">
+            <h3 style="margin-top: 0;">Pieces specifiques</h3>
+            <ul style="margin: 0; padding-left: 1.1rem;">
+                <c:forEach items="${typesPiecesSpecifiques}" var="piece">
+                    <li style="margin-bottom: 0.4rem;">
+                        <c:choose>
+                            <c:when test="${piecesSpecifiquesSelection[piece.id]}"><span class="status-ok">✓</span></c:when>
+                            <c:otherwise><span class="status-ko">✗</span></c:otherwise>
+                        </c:choose>
+                        ${piece.libelle}
+                    </li>
+                </c:forEach>
+                <c:if test="${empty typesPiecesSpecifiques}"><li>Aucune piece specifique.</li></c:if>
+            </ul>
+        </section>
+
+        <form method="post" action="${pageContext.request.contextPath}/demande/nouveau/etape4">
+            <div class="actions">
+                <a class="btn btn-secondary" href="${pageContext.request.contextPath}/demande/nouveau/etape1">&larr; Modifier</a>
+                <button type="submit" class="btn btn-primary">Confirmer et soumettre</button>
+            </div>
+        </form>
+    </main>
 </div>
 </body>
 </html>
