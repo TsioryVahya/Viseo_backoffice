@@ -60,25 +60,30 @@ CREATE TABLE Demande (
     id SERIAL PRIMARY KEY,
     id_visa_transformable INT,
     date_demande DATE NOT NULL,
-    id_statut INT NOT NULL DEFAULT 1,
     id_demandeur INT NOT NULL,
     id_type_visa INT NOT NULL,
     id_type_demande INT NOT NULL,
-    date_traitement DATE,
     FOREIGN KEY (id_type_demande) REFERENCES Type_demande(id),
     FOREIGN KEY (id_demandeur) REFERENCES Demandeur(id),
     FOREIGN KEY (id_type_visa) REFERENCES type_visa(id),
     FOREIGN KEY (id_visa_transformable) REFERENCES Visa_transformable(id)
 );
 
+CREATE TABLE Statut_demande_type (
+    id SERIAL PRIMARY KEY,
+    libelle VARCHAR(100) NOT NULL,
+    description TEXT
+
+);
+
 CREATE TABLE Statut_demande (
     id SERIAL PRIMARY KEY,
     id_demande INT NOT NULL,
-    statut INT NOT NULL,
-    date_changement_statut DATE,
-    FOREIGN KEY (id_demande) REFERENCES Demande(id)
+    id_statut_type INT NOT NULL,
+    date_changement TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (id_demande) REFERENCES Demande(id),
+    FOREIGN KEY (id_statut_type) REFERENCES Statut_demande_type(id)
 );
-
 CREATE TABLE Type_piece_commune (
     id SERIAL PRIMARY KEY,
     libelle VARCHAR(150) NOT NULL,
@@ -147,6 +152,13 @@ INSERT INTO type_visa (libelle) VALUES ('Investisseur'), ('Travailleur');
 
 INSERT INTO Type_demande (libelle) VALUES ('Nouveau titre'), ('Duplicata'), ('Transfert de visa');
 
+INSERT INTO Statut_demande_type (libelle, description) VALUES
+('Dossier creer', 'Demande soumise, en attente de traitement'),
+('Pièces manquantes', 'Demande suspendue, des pièces sont manquantes ou invalides'),
+('Approuvée', 'Demande approuvée, titre en cours de préparation'),
+('Rejetée', 'Demande rejetée'),
+('Titre délivré', 'Le titre a été remis au demandeur');
+
 INSERT INTO Type_piece_commune (libelle, obligatoire) VALUES
 ('02 photos d''identité récentes', TRUE),
 ('Notice de renseignement', TRUE),
@@ -161,3 +173,4 @@ INSERT INTO Type_piece_specifique (libelle, id_type_visa, obligatoire) VALUES
 ('Carte fiscale', 1, TRUE),
 ('Contrat de travail', 2, TRUE),
 ('Autorisation de travail', 2, TRUE);
+
