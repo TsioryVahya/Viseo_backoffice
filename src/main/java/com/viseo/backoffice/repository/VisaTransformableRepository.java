@@ -13,6 +13,8 @@ public interface VisaTransformableRepository extends JpaRepository<VisaTransform
 
     Optional<VisaTransformable> findById(Integer id);
 
+    Optional<VisaTransformable> findByNumeroReference(String numeroReference);
+
     VisaTransformable save(VisaTransformable entity);
 
     void deleteById(Integer id);

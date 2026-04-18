@@ -52,6 +52,7 @@ CREATE TABLE Visa_transformable (
     id_demandeur INT NOT NULL,
     id_passeport INT NOT NULL,
     numero_reference VARCHAR(50) NOT NULL UNIQUE,
+    date_expiration DATE NOT NULL,
     FOREIGN KEY (id_demandeur) REFERENCES Demandeur(id),
     FOREIGN KEY (id_passeport) REFERENCES Passeport(id)
 );

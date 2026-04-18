@@ -3,33 +3,17 @@ package com.viseo.backoffice.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.stereotype.Service;
-
 import com.viseo.backoffice.model.VisaTransformable;
-import com.viseo.backoffice.repository.VisaTransformableRepository;
 
-@Service
-public class VisaTransformableService {
+public interface VisaTransformableService {
 
-    private final VisaTransformableRepository visaTransformableRepository;
+    List<VisaTransformable> findAll();
 
-    public VisaTransformableService(VisaTransformableRepository visaTransformableRepository) {
-        this.visaTransformableRepository = visaTransformableRepository;
-    }
+    Optional<VisaTransformable> findById(Integer id);
 
-    public List<VisaTransformable> findAll() {
-        return visaTransformableRepository.findAll();
-    }
+    Optional<VisaTransformable> findByNumeroReference(String numeroReference);
 
-    public Optional<VisaTransformable> findById(Integer id) {
-        return visaTransformableRepository.findById(id);
-    }
+    VisaTransformable save(VisaTransformable visaTransformable);
 
-    public VisaTransformable save(VisaTransformable entity) {
-        return visaTransformableRepository.save(entity);
-    }
-
-    public void deleteById(Integer id) {
-        visaTransformableRepository.deleteById(id);
-    }
+    void deleteById(Integer id);
 }

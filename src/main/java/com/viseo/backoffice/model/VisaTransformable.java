@@ -1,5 +1,7 @@
 package com.viseo.backoffice.model;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,6 +29,9 @@ public class VisaTransformable {
 
     @Column(name = "numero_reference", nullable = false, length = 50, unique = true)
     private String numeroReference;
+
+    @Column(name = "date_expiration", nullable = false)
+    private LocalDate dateExpiration;
 
     public Integer getId() {
         return id;
@@ -58,5 +63,13 @@ public class VisaTransformable {
 
     public void setNumeroReference(String numeroReference) {
         this.numeroReference = numeroReference;
+    }
+
+    public LocalDate getDateExpiration() {
+        return dateExpiration;
+    }
+
+    public void setDateExpiration(LocalDate dateExpiration) {
+        this.dateExpiration = dateExpiration;
     }
 }
