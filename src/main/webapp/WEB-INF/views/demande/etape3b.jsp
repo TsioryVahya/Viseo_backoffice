@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css">
 </head>
 <body>
-<c:set var="etapeActuelle" value="${empty etapeActuelle ? 3 : etapeActuelle}" />
 <c:set var="activeMenu" value="nouvelle-demande" />
 
 <div class="app-layout">
@@ -27,7 +26,35 @@
     <main class="main-content">
         <h1 class="page-title">Nouvelle demande</h1>
         <p class="page-subtitle">Completer les pieces specifiques au visa selectionne.</p>
-        <jsp:include page="/WEB-INF/views/common/stepper.jspf" />
+        <div class="stepper">
+            <div class="stepper-item done">
+                <div>
+                    <div class="stepper-node">✓</div>
+                    <div class="stepper-label">Informations personnelles</div>
+                </div>
+                <div class="stepper-track"></div>
+            </div>
+            <div class="stepper-item done">
+                <div>
+                    <div class="stepper-node">✓</div>
+                    <div class="stepper-label">Passeport</div>
+                </div>
+                <div class="stepper-track"></div>
+            </div>
+            <div class="stepper-item active">
+                <div>
+                    <div class="stepper-node">3</div>
+                    <div class="stepper-label">Demande</div>
+                </div>
+                <div class="stepper-track"></div>
+            </div>
+            <div class="stepper-item future">
+                <div>
+                    <div class="stepper-node">4</div>
+                    <div class="stepper-label">Resume</div>
+                </div>
+            </div>
+        </div>
 
         <section class="card">
             <h2 style="margin-top: 0;">Pieces specifiques</h2>

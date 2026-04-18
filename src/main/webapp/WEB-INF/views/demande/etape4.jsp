@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css">
 </head>
 <body>
-<c:set var="etapeActuelle" value="${empty etapeActuelle ? 4 : etapeActuelle}" />
 <c:set var="activeMenu" value="nouvelle-demande" />
 
 <div class="app-layout">
@@ -27,7 +26,35 @@
     <main class="main-content">
         <h1 class="page-title">Resume et confirmation</h1>
         <p class="page-subtitle">Verifiez le dossier avant soumission definitive.</p>
-        <jsp:include page="/WEB-INF/views/common/stepper.jspf" />
+        <div class="stepper">
+            <div class="stepper-item done">
+                <div>
+                    <div class="stepper-node">✓</div>
+                    <div class="stepper-label">Informations personnelles</div>
+                </div>
+                <div class="stepper-track"></div>
+            </div>
+            <div class="stepper-item done">
+                <div>
+                    <div class="stepper-node">✓</div>
+                    <div class="stepper-label">Passeport</div>
+                </div>
+                <div class="stepper-track"></div>
+            </div>
+            <div class="stepper-item done">
+                <div>
+                    <div class="stepper-node">✓</div>
+                    <div class="stepper-label">Demande</div>
+                </div>
+                <div class="stepper-track"></div>
+            </div>
+            <div class="stepper-item active">
+                <div>
+                    <div class="stepper-node">4</div>
+                    <div class="stepper-label">Resume</div>
+                </div>
+            </div>
+        </div>
         <c:if test="${not empty erreurs.global}"><div class="erreur" style="margin-bottom: 1rem;">${erreurs.global}</div></c:if>
 
         <section class="card">

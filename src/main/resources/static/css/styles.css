@@ -1,0 +1,372 @@
+:root {
+    --green: #3E5F44;
+    --sand-light: #F5F1E6;
+    --sand: #DDD6B9;
+    --sand-hover: #e8e2d0;
+    --noir: #1a1a16;
+    --blanc: #ffffff;
+    --gris-text: #6b6b60;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--sand-light);
+    color: var(--noir);
+}
+
+a {
+    color: inherit;
+}
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    background: var(--sand-light);
+}
+
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--green);
+    color: var(--blanc);
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+}
+
+.sidebar-logo {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+
+.sidebar-separator {
+    height: 1px;
+    margin: 1rem 0 1.2rem;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.sidebar-link {
+    display: block;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.6rem 0.7rem;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.sidebar-link.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--blanc);
+    font-weight: 500;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.35);
+    padding-top: 1rem;
+}
+
+.main-content {
+    flex: 1;
+    min-height: 100vh;
+    padding: 2rem;
+    background: var(--sand-light);
+}
+
+.page-title {
+    margin: 0 0 0.4rem;
+    font-size: 28px;
+    line-height: 1.2;
+    color: var(--green);
+    font-weight: 500;
+}
+
+.page-subtitle {
+    margin: 0 0 1.5rem;
+    color: var(--gris-text);
+}
+
+.card {
+    background: var(--blanc);
+    border: 1px solid var(--sand);
+    border-radius: 12px;
+    padding: 2rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.card + .card {
+    margin-top: 1rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    border: 1px solid var(--green);
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--green);
+    color: var(--blanc);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--green);
+}
+
+.btn-secondary:hover {
+    background: var(--sand-hover);
+}
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.form-row {
+    margin-bottom: 1rem;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--gris-text);
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    height: 42px;
+    border: 1px solid var(--sand);
+    border-radius: 8px;
+    background: var(--blanc);
+    padding: 0.55rem 0.7rem;
+    color: var(--noir);
+}
+
+textarea {
+    min-height: 96px;
+    height: auto;
+    resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(62, 95, 68, 0.15);
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--sand);
+    border-radius: 8px;
+    padding: 0.6rem 0.7rem;
+    background: var(--blanc);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.checkbox-item:hover {
+    background: var(--sand-hover);
+}
+
+.checkbox-item:has(input:checked) {
+    border-color: var(--green);
+}
+
+.erreur {
+    margin-top: 0.25rem;
+    color: #c0392b;
+    font-size: 12px;
+}
+
+.stepper {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.4rem;
+}
+
+.stepper-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.stepper-node {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blanc);
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: var(--sand);
+}
+
+.stepper-item.done .stepper-node {
+    background: var(--gris-text);
+}
+
+.stepper-item.active .stepper-node {
+    background: var(--green);
+}
+
+.stepper-label {
+    margin-top: 0.4rem;
+    width: 110px;
+    margin-left: -40px;
+    text-align: center;
+    font-size: 12px;
+    color: #8b8b7f;
+}
+
+.stepper-item.done .stepper-label {
+    color: var(--gris-text);
+}
+
+.stepper-item.active .stepper-label {
+    color: var(--green);
+    font-weight: 500;
+}
+
+.stepper-track {
+    flex: 1;
+    height: 1px;
+    background: var(--sand);
+    margin: 16px 10px 0;
+}
+
+.resume-grid {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 0.45rem 0.9rem;
+}
+
+.resume-label {
+    color: var(--gris-text);
+    font-size: 0.92rem;
+}
+
+.resume-value {
+    color: var(--noir);
+}
+
+.status-ok {
+    color: #2d8653;
+    font-weight: 500;
+}
+
+.status-ko {
+    color: #c0392b;
+    font-weight: 500;
+}
+
+.confirmation-check {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 1rem;
+    border-radius: 999px;
+    background: var(--green);
+    color: var(--blanc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.dossier-box {
+    display: inline-block;
+    border: 1px solid var(--green);
+    color: var(--green);
+    border-radius: 8px;
+    padding: 0.55rem 0.9rem;
+    font-weight: 500;
+    background: #eef5ef;
+}
+
+@media (max-width: 900px) {
+    .app-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+    }
+
+    .main-content {
+        padding: 1.2rem;
+    }
+
+    .form-grid-2,
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+}
