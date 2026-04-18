@@ -1,3 +1,4 @@
+\c postgres
 
 DROP TABLE IF EXISTS carte_resident CASCADE;
 DROP TABLE IF EXISTS visa CASCADE;

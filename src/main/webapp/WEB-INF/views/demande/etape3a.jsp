@@ -58,8 +58,19 @@
 
         <section class="card">
             <h2 style="margin-top: 0;">Type de visa et pieces communes</h2>
+            <c:if test="${not empty avertissementVisa}">
+                <div class="erreur" style="margin-bottom: 1rem; border: 1px solid #d07f2c; background: #fff4e5; color: #8a5d20; padding: 0.7rem; border-radius: 8px;">
+                    ${avertissementVisa}
+                </div>
+            </c:if>
 
             <form method="post" action="${pageContext.request.contextPath}/demande/nouveau/etape3a">
+                <div class="form-row">
+                    <label for="dateDemande">Date de la demande</label>
+                    <input type="date" id="dateDemande" name="dateDemande" value="${dateDemande}" required>
+                    <c:if test="${not empty erreurs.dateDemande}"><div class="erreur">${erreurs.dateDemande}</div></c:if>
+                </div>
+
                 <div class="form-row">
                     <label for="typeVisaId">Type de visa</label>
                     <select id="typeVisaId" name="typeVisaId">

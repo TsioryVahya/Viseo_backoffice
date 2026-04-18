@@ -6,6 +6,7 @@ com\viseo\backoffice\controller\NationaliteController.class
 com\viseo\backoffice\model\TypeDemande.class
 com\viseo\backoffice\repository\CarteResidentRepository.class
 com\viseo\backoffice\repository\VisaTransformableRepository.class
+com\viseo\backoffice\service\VisaTransformableServiceImpl.class
 com\viseo\backoffice\repository\TypePieceCommuneRepository.class
 com\viseo\backoffice\model\Visa.class
 com\viseo\backoffice\model\TypePieceCommune.class

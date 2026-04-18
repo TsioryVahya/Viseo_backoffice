@@ -87,6 +87,21 @@
                     </div>
                 </div>
 
+                <hr style="border: 0; border-top: 1px solid var(--sand); margin: 1.2rem 0;">
+                <h3 style="margin-top: 0; color: var(--green);">Visa transformable</h3>
+
+                <div class="form-row">
+                    <label for="numeroReferenceVisa">Numero de reference du visa transformable</label>
+                    <input type="text" id="numeroReferenceVisa" name="numeroReferenceVisa" value="${form.numeroReferenceVisa}" required>
+                    <c:if test="${not empty erreurs.numeroReferenceVisa}"><div class="erreur">${erreurs.numeroReferenceVisa}</div></c:if>
+                </div>
+
+                <div class="form-row">
+                    <label for="dateExpirationVisa">Date d'expiration du visa transformable</label>
+                    <input type="date" id="dateExpirationVisa" name="dateExpirationVisa" value="${form.dateExpirationVisa}" required>
+                    <c:if test="${not empty erreurs.dateExpirationVisa}"><div class="erreur">${erreurs.dateExpirationVisa}</div></c:if>
+                </div>
+
                 <div class="actions">
                     <a class="btn btn-secondary" href="${pageContext.request.contextPath}/demande/nouveau/etape1">&larr; Precedent</a>
                     <button type="submit" class="btn btn-primary">Suivant &rarr;</button>

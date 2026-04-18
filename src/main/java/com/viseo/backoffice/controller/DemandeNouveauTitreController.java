@@ -33,6 +33,7 @@ import com.viseo.backoffice.model.TypeDemande;
 import com.viseo.backoffice.model.TypePieceCommune;
 import com.viseo.backoffice.model.TypePieceSpecifique;
 import com.viseo.backoffice.model.TypeVisa;
+import com.viseo.backoffice.model.VisaTransformable;
 import com.viseo.backoffice.service.DemandeService;
 import com.viseo.backoffice.service.DemandeurService;
 import com.viseo.backoffice.service.NationaliteService;
@@ -46,6 +47,7 @@ import com.viseo.backoffice.service.TypeDemandeService;
 import com.viseo.backoffice.service.TypePieceCommuneService;
 import com.viseo.backoffice.service.TypePieceSpecifiqueService;
 import com.viseo.backoffice.service.TypeVisaService;
+import com.viseo.backoffice.service.VisaTransformableService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -58,6 +60,10 @@ public class DemandeNouveauTitreController {
     private static final String SESSION_TYPE_VISA_ID = "typeVisaId";
     private static final String SESSION_PIECES_COMMUNES = "piecesCommunes";
     private static final String SESSION_PIECES_SPECIFIQUES = "piecesSpecifiques";
+    private static final String SESSION_NUMERO_REFERENCE_VISA = "numeroReferenceVisa";
+    private static final String SESSION_DATE_EXPIRATION_VISA = "dateExpirationVisa";
+    private static final String SESSION_DATE_DEMANDE = "dateDemande";
+    private static final String SESSION_AVERTISSEMENT_VISA = "avertissementVisa";
 
     private final NationaliteService nationaliteService;
     private final SituationFamilialeService situationFamilialeService;
@@ -70,6 +76,7 @@ public class DemandeNouveauTitreController {
     private final StatutDemandeService statutDemandeService;
     private final PieceDemandeService pieceDemandeService;
     private final PieceDemandeSpecifiqueService pieceDemandeSpecifiqueService;
+    private final VisaTransformableService visaTransformableService;
     private final TypeDemandeService typeDemandeService;
     private final StatutDemandeTypeService statutDemandeTypeService;
 
@@ -85,6 +92,7 @@ public class DemandeNouveauTitreController {
             StatutDemandeService statutDemandeService,
             PieceDemandeService pieceDemandeService,
             PieceDemandeSpecifiqueService pieceDemandeSpecifiqueService,
+            VisaTransformableService visaTransformableService,
             TypeDemandeService typeDemandeService,
             StatutDemandeTypeService statutDemandeTypeService) {
         this.nationaliteService = nationaliteService;
@@ -98,6 +106,7 @@ public class DemandeNouveauTitreController {
         this.statutDemandeService = statutDemandeService;
         this.pieceDemandeService = pieceDemandeService;
         this.pieceDemandeSpecifiqueService = pieceDemandeSpecifiqueService;
+        this.visaTransformableService = visaTransformableService;
         this.typeDemandeService = typeDemandeService;
         this.statutDemandeTypeService = statutDemandeTypeService;
     }
@@ -210,7 +219,13 @@ public class DemandeNouveauTitreController {
         }
 
         Passeport passeport = (Passeport) session.getAttribute(SESSION_PASSEPORT);
-        model.addAttribute("form", formEtape2DepuisSession(passeport));
+        Map<String, String> form = formEtape2DepuisSession(passeport);
+        Object numeroReferenceVisa = session.getAttribute(SESSION_NUMERO_REFERENCE_VISA);
+        Object dateExpirationVisa = session.getAttribute(SESSION_DATE_EXPIRATION_VISA);
+        form.put("numeroReferenceVisa", numeroReferenceVisa == null ? "" : String.valueOf(numeroReferenceVisa));
+        form.put("dateExpirationVisa", dateExpirationVisa instanceof LocalDate ? ((LocalDate) dateExpirationVisa).toString() : "");
+
+        model.addAttribute("form", form);
         model.addAttribute("erreurs", Collections.emptyMap());
         return "demande/etape2";
     }
@@ -221,6 +236,8 @@ public class DemandeNouveauTitreController {
             @RequestParam(required = false) String dateDelivrance,
             @RequestParam(required = false) String dateExpiration,
             @RequestParam(required = false) String paysDelivrance,
+            @RequestParam(required = false) String numeroReferenceVisa,
+            @RequestParam(required = false) String dateExpirationVisa,
             Model model,
             HttpSession session) {
 
@@ -234,13 +251,19 @@ public class DemandeNouveauTitreController {
         form.put("dateDelivrance", valeur(dateDelivrance));
         form.put("dateExpiration", valeur(dateExpiration));
         form.put("paysDelivrance", valeur(paysDelivrance));
+        form.put("numeroReferenceVisa", valeur(numeroReferenceVisa));
+        form.put("dateExpirationVisa", valeur(dateExpirationVisa));
 
         if (form.get("numeroPasseport").isEmpty()) {
             erreurs.put("numeroPasseport", "Le numero de passeport est obligatoire.");
         }
+        if (form.get("numeroReferenceVisa").isEmpty()) {
+            erreurs.put("numeroReferenceVisa", "Le numero de reference du visa transformable est obligatoire.");
+        }
 
         LocalDate dateDelivranceParsee = null;
         LocalDate dateExpirationParsee = null;
+        LocalDate dateExpirationVisaParsee = null;
 
         if (form.get("dateDelivrance").isEmpty()) {
             erreurs.put("dateDelivrance", "La date de delivrance est obligatoire.");
@@ -267,6 +290,16 @@ public class DemandeNouveauTitreController {
             erreurs.put("dateExpiration", "La date d'expiration doit etre apres la date de delivrance.");
         }
 
+        if (form.get("dateExpirationVisa").isEmpty()) {
+            erreurs.put("dateExpirationVisa", "La date d'expiration du visa transformable est obligatoire.");
+        } else {
+            try {
+                dateExpirationVisaParsee = LocalDate.parse(form.get("dateExpirationVisa"));
+            } catch (DateTimeParseException exception) {
+                erreurs.put("dateExpirationVisa", "La date d'expiration du visa transformable est invalide.");
+            }
+        }
+
         if (!erreurs.isEmpty()) {
             model.addAttribute("form", form);
             model.addAttribute("erreurs", erreurs);
@@ -280,6 +313,14 @@ public class DemandeNouveauTitreController {
         passeport.setPaysDelivrance(form.get("paysDelivrance"));
 
         session.setAttribute(SESSION_PASSEPORT, passeport);
+        session.setAttribute(SESSION_NUMERO_REFERENCE_VISA, form.get("numeroReferenceVisa"));
+        session.setAttribute(SESSION_DATE_EXPIRATION_VISA, dateExpirationVisaParsee);
+        if (dateExpirationVisaParsee != null && dateExpirationVisaParsee.isBefore(LocalDate.now())) {
+            session.setAttribute(SESSION_AVERTISSEMENT_VISA,
+                    "Attention: le visa transformable semble deja expire a la saisie.");
+        } else {
+            session.removeAttribute(SESSION_AVERTISSEMENT_VISA);
+        }
         return "redirect:/demande/nouveau/etape3a";
     }
 
@@ -295,6 +336,9 @@ public class DemandeNouveauTitreController {
         model.addAttribute("typesVisa", typesVisa);
         model.addAttribute("piecesCommunes", piecesCommunes);
         model.addAttribute("typeVisaId", session.getAttribute(SESSION_TYPE_VISA_ID));
+        Object dateDemande = session.getAttribute(SESSION_DATE_DEMANDE);
+        model.addAttribute("dateDemande", dateDemande == null ? LocalDate.now().toString() : String.valueOf(dateDemande));
+        model.addAttribute("avertissementVisa", session.getAttribute(SESSION_AVERTISSEMENT_VISA));
         model.addAttribute("piecesCommunesSelection", lireMapSession(session, SESSION_PIECES_COMMUNES));
         model.addAttribute("erreurs", Collections.emptyMap());
         return "demande/etape3a";
@@ -303,6 +347,7 @@ public class DemandeNouveauTitreController {
     @PostMapping("/nouveau/etape3a")
     public String traiterEtape3a(
             @RequestParam(required = false) String typeVisaId,
+            @RequestParam(required = false) String dateDemande,
             @RequestParam Map<String, String> params,
             Model model,
             HttpSession session) {
@@ -318,6 +363,17 @@ public class DemandeNouveauTitreController {
             erreurs.put("typeVisaId", "Le type de visa selectionne est introuvable.");
         }
 
+        LocalDate dateDemandeParsee = null;
+        if (valeur(dateDemande).isEmpty()) {
+            erreurs.put("dateDemande", "La date de la demande est obligatoire.");
+        } else {
+            try {
+                dateDemandeParsee = LocalDate.parse(dateDemande);
+            } catch (DateTimeParseException exception) {
+                erreurs.put("dateDemande", "La date de la demande est invalide.");
+            }
+        }
+
         List<TypePieceCommune> piecesCommunes = typePieceCommuneService.findAll();
         Map<Integer, Boolean> selection = new LinkedHashMap<>();
         for (TypePieceCommune piece : piecesCommunes) {
@@ -329,12 +385,14 @@ public class DemandeNouveauTitreController {
             model.addAttribute("typesVisa", typeVisaService.findAll());
             model.addAttribute("piecesCommunes", piecesCommunes);
             model.addAttribute("typeVisaId", typeVisaId);
+            model.addAttribute("dateDemande", dateDemande);
             model.addAttribute("piecesCommunesSelection", selection);
             model.addAttribute("erreurs", erreurs);
             return "demande/etape3a";
         }
 
         session.setAttribute(SESSION_TYPE_VISA_ID, typeVisaIdValue);
+        session.setAttribute(SESSION_DATE_DEMANDE, dateDemandeParsee);
         session.setAttribute(SESSION_PIECES_COMMUNES, selection);
         return "redirect:/demande/nouveau/etape3b";
     }
@@ -402,6 +460,19 @@ public class DemandeNouveauTitreController {
             return "redirect:/demande/nouveau/etape1";
         }
 
+        String numeroReferenceVisa = (String) session.getAttribute(SESSION_NUMERO_REFERENCE_VISA);
+        LocalDate dateExpirationVisa = (LocalDate) session.getAttribute(SESSION_DATE_EXPIRATION_VISA);
+        LocalDate dateDemande = (LocalDate) session.getAttribute(SESSION_DATE_DEMANDE);
+
+        if (dateExpirationVisa != null && dateDemande != null && dateExpirationVisa.isBefore(dateDemande)) {
+            model.addAttribute(
+                    "erreurVisa",
+                    "Le visa transformable est expire a la date de la demande. Date d'expiration : "
+                            + dateExpirationVisa + " / Date de demande : " + dateDemande);
+            model.addAttribute("erreurs", Collections.emptyMap());
+            return "demande/etape4";
+        }
+
         Demandeur demandeur = (Demandeur) session.getAttribute(SESSION_DEMANDEUR);
         Passeport passeport = (Passeport) session.getAttribute(SESSION_PASSEPORT);
         Integer typeVisaId = (Integer) session.getAttribute(SESSION_TYPE_VISA_ID);
@@ -422,6 +493,15 @@ public class DemandeNouveauTitreController {
         if (statutDemandeType.isEmpty()) {
             erreurs.put("global", "La reference Statut_demande_type id=1 est manquante.");
         }
+        if (numeroReferenceVisa == null || numeroReferenceVisa.isBlank()) {
+            erreurs.put("global", "Le numero de reference du visa transformable est obligatoire.");
+        }
+        if (dateExpirationVisa == null) {
+            erreurs.put("global", "La date d'expiration du visa transformable est obligatoire.");
+        }
+        if (dateDemande == null) {
+            erreurs.put("global", "La date de la demande est obligatoire.");
+        }
 
         if (!erreurs.isEmpty()) {
             model.addAttribute("erreurs", erreurs);
@@ -434,12 +514,25 @@ public class DemandeNouveauTitreController {
             passeport.setDemandeur(savedDemandeur);
             Passeport savedPasseport = passeportService.save(passeport);
 
+            Optional<VisaTransformable> visaExistant = visaTransformableService.findByNumeroReference(numeroReferenceVisa);
+            VisaTransformable visaTransformable;
+            if (visaExistant.isPresent()) {
+                visaTransformable = visaExistant.get();
+            } else {
+                VisaTransformable nouveauVisa = new VisaTransformable();
+                nouveauVisa.setDemandeur(savedDemandeur);
+                nouveauVisa.setPasseport(savedPasseport);
+                nouveauVisa.setNumeroReference(numeroReferenceVisa);
+                nouveauVisa.setDateExpiration(dateExpirationVisa);
+                visaTransformable = visaTransformableService.save(nouveauVisa);
+            }
+
             Demande demande = new Demande();
-            demande.setDateDemande(LocalDate.now());
+            demande.setDateDemande(dateDemande);
             demande.setDemandeur(savedDemandeur);
             demande.setTypeVisa(typeVisa.get());
             demande.setTypeDemande(typeDemande.get());
-            demande.setVisaTransformable(null);
+            demande.setVisaTransformable(visaTransformable);
             Demande savedDemande = demandeService.save(demande);
 
             StatutDemande statutDemande = new StatutDemande();
@@ -448,25 +541,31 @@ public class DemandeNouveauTitreController {
             statutDemande.setDateChangement(LocalDateTime.now());
             statutDemandeService.save(statutDemande);
 
-            List<TypePieceCommune> piecesCommunes = typePieceCommuneService.findAll();
-            for (TypePieceCommune typePieceCommune : piecesCommunes) {
+            for (Map.Entry<Integer, Boolean> entry : piecesCommunesSelection.entrySet()) {
+                Optional<TypePieceCommune> typePieceCommune = typePieceCommuneService.findById(entry.getKey());
+                if (typePieceCommune.isEmpty()) {
+                    continue;
+                }
                 PieceDemande pieceDemande = new PieceDemande();
                 pieceDemande.setDemande(savedDemande);
-                pieceDemande.setTypePieceCommune(typePieceCommune);
-                pieceDemande.setPresente(piecesCommunesSelection.getOrDefault(typePieceCommune.getId(), Boolean.FALSE));
+                pieceDemande.setTypePieceCommune(typePieceCommune.get());
+                pieceDemande.setPresente(entry.getValue());
                 pieceDemandeService.save(pieceDemande);
             }
 
-            List<TypePieceSpecifique> piecesSpecifiques = filtrerPiecesSpecifiquesParTypeVisa(typeVisaId);
-            for (TypePieceSpecifique typePieceSpecifique : piecesSpecifiques) {
+            for (Map.Entry<Integer, Boolean> entry : piecesSpecifiquesSelection.entrySet()) {
+                Optional<TypePieceSpecifique> typePieceSpecifique = typePieceSpecifiqueService.findById(entry.getKey());
+                if (typePieceSpecifique.isEmpty()) {
+                    continue;
+                }
                 PieceDemandeSpecifique pieceDemandeSpecifique = new PieceDemandeSpecifique();
                 pieceDemandeSpecifique.setDemande(savedDemande);
-                pieceDemandeSpecifique.setTypePiece(typePieceSpecifique);
-                pieceDemandeSpecifique.setPresente(piecesSpecifiquesSelection.getOrDefault(typePieceSpecifique.getId(), Boolean.FALSE));
+                pieceDemandeSpecifique.setTypePiece(typePieceSpecifique.get());
+                pieceDemandeSpecifique.setPresente(entry.getValue());
                 pieceDemandeSpecifiqueService.save(pieceDemandeSpecifique);
             }
 
-            viderSession(session);
+            session.invalidate();
             return "redirect:/demande/confirmation/" + savedDemande.getId();
         } catch (RuntimeException exception) {
             erreurs.put("global", "Erreur lors de la sauvegarde: " + exception.getMessage());
@@ -553,8 +652,12 @@ public class DemandeNouveauTitreController {
         Demandeur demandeur = (Demandeur) session.getAttribute(SESSION_DEMANDEUR);
         Passeport passeport = (Passeport) session.getAttribute(SESSION_PASSEPORT);
         Integer typeVisaId = (Integer) session.getAttribute(SESSION_TYPE_VISA_ID);
+        String numeroReferenceVisa = (String) session.getAttribute(SESSION_NUMERO_REFERENCE_VISA);
+        LocalDate dateExpirationVisa = (LocalDate) session.getAttribute(SESSION_DATE_EXPIRATION_VISA);
+        LocalDate dateDemande = (LocalDate) session.getAttribute(SESSION_DATE_DEMANDE);
 
-        if (demandeur == null || passeport == null || typeVisaId == null) {
+        if (demandeur == null || passeport == null || typeVisaId == null || numeroReferenceVisa == null
+                || dateExpirationVisa == null || dateDemande == null) {
             return false;
         }
 
@@ -573,6 +676,9 @@ public class DemandeNouveauTitreController {
         model.addAttribute("piecesSpecifiquesSelection", lireMapSession(session, SESSION_PIECES_SPECIFIQUES));
         model.addAttribute("typesPiecesCommunes", typesPiecesCommunes);
         model.addAttribute("typesPiecesSpecifiques", typesPiecesSpecifiques);
+        model.addAttribute("numeroReferenceVisa", numeroReferenceVisa);
+        model.addAttribute("dateExpirationVisa", dateExpirationVisa);
+        model.addAttribute("dateDemande", dateDemande);
 
         if (demandeur.getDateNaissance() != null) {
             model.addAttribute("dateNaissanceDate", Date.valueOf(demandeur.getDateNaissance()));
@@ -592,5 +698,8 @@ public class DemandeNouveauTitreController {
         session.removeAttribute(SESSION_TYPE_VISA_ID);
         session.removeAttribute(SESSION_PIECES_COMMUNES);
         session.removeAttribute(SESSION_PIECES_SPECIFIQUES);
+        session.removeAttribute(SESSION_NUMERO_REFERENCE_VISA);
+        session.removeAttribute(SESSION_DATE_EXPIRATION_VISA);
+        session.removeAttribute(SESSION_DATE_DEMANDE);
     }
 }

@@ -55,6 +55,14 @@
                 </div>
             </div>
         </div>
+        <c:if test="${not empty erreurVisa}">
+            <div class="erreur" style="margin-bottom: 1rem; border: 1px solid #c0392b; background: #fdecea; padding: 0.75rem; border-radius: 8px;">
+                ${erreurVisa}
+                <div style="margin-top: 0.5rem;">
+                    <a class="btn btn-secondary" href="${pageContext.request.contextPath}/demande/nouveau/etape2">&larr; Corriger le visa transformable</a>
+                </div>
+            </div>
+        </c:if>
         <c:if test="${not empty erreurs.global}"><div class="erreur" style="margin-bottom: 1rem;">${erreurs.global}</div></c:if>
 
         <section class="card">
@@ -79,6 +87,8 @@
                 <div class="resume-label">Date delivrance</div><div class="resume-value"><fmt:formatDate value="${dateDelivranceDate}" pattern="dd/MM/yyyy" /></div>
                 <div class="resume-label">Date expiration</div><div class="resume-value"><fmt:formatDate value="${dateExpirationDate}" pattern="dd/MM/yyyy" /></div>
                 <div class="resume-label">Pays delivrance</div><div class="resume-value">${passeport.paysDelivrance}</div>
+                <div class="resume-label">Numero de reference visa</div><div class="resume-value">${numeroReferenceVisa}</div>
+                <div class="resume-label">Date d'expiration visa</div><div class="resume-value">${dateExpirationVisa}</div>
             </div>
         </section>
 
@@ -86,6 +96,7 @@
             <h3 style="margin-top: 0;">Demande</h3>
             <div class="resume-grid">
                 <div class="resume-label">Type de visa</div><div class="resume-value">${typeVisa.libelle}</div>
+                <div class="resume-label">Date de la demande</div><div class="resume-value">${dateDemande}</div>
             </div>
         </section>
 
