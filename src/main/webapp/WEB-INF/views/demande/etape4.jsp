@@ -63,6 +63,19 @@
                 </div>
             </div>
         </c:if>
+        <c:if test="${not empty erreurPieces}">
+            <div class="erreur" style="margin-bottom: 1rem; border: 1px solid #c0392b; background: #fdecea; padding: 0.75rem; border-radius: 8px;">
+                <strong>${erreurPieces}</strong>
+                <ul style="margin: 0.6rem 0 0.6rem 1rem;">
+                    <c:forEach var="piece" items="${listePiecesManquantes}">
+                        <li>${piece}</li>
+                    </c:forEach>
+                </ul>
+                <a class="btn btn-secondary" href="${pageContext.request.contextPath}/demande/nouveau/etape3a">&larr; Corriger les pieces communes</a>
+                <span style="margin: 0 0.35rem;">|</span>
+                <a class="btn btn-secondary" href="${pageContext.request.contextPath}/demande/nouveau/etape3b">&larr; Corriger les pieces specifiques</a>
+            </div>
+        </c:if>
         <c:if test="${not empty erreurs.global}"><div class="erreur" style="margin-bottom: 1rem;">${erreurs.global}</div></c:if>
 
         <section class="card">

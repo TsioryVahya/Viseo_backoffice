@@ -25,6 +25,10 @@ public class TypePieceSpecifiqueService {
         return typePieceSpecifiqueRepository.findById(id);
     }
 
+    public List<TypePieceSpecifique> findByTypeVisaId(Integer typeVisaId) {
+        return typePieceSpecifiqueRepository.findByIdTypeVisa(typeVisaId);
+    }
+
     public TypePieceSpecifique save(TypePieceSpecifique entity) {
         return typePieceSpecifiqueRepository.save(entity);
     }
