@@ -32,4 +32,25 @@ public class StatutDemandeTypeService {
     public void deleteById(Integer id) {
         statutDemandeTypeRepository.deleteById(id);
     }
+
+    /**
+     * Récupère l'ID du statut 'Titre délivré'
+     * Utilisé pour approuver immédiatement les duplicatas dans le Sprint 2
+     * 
+     * @return l'ID du statut 'Titre délivré', ou Optional.empty() si non trouvé
+     */
+    public Optional<Integer> getIdStatutTitreDelivre() {
+        return statutDemandeTypeRepository.findByLibelle("Titre délivré")
+                .map(StatutDemandeType::getId);
+    }
+
+    /**
+     * Récupère le statut par son libellé
+     * 
+     * @param libelle le libellé du statut
+     * @return le statut trouvé, ou Optional.empty() si non trouvé
+     */
+    public Optional<StatutDemandeType> findByLibelle(String libelle) {
+        return statutDemandeTypeRepository.findByLibelle(libelle);
+    }
 }

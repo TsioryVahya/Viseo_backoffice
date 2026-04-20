@@ -15,11 +15,12 @@
 
         <nav class="sidebar-nav">
             <a class="sidebar-link active" href="${pageContext.request.contextPath}/demande/nouveau/etape1">Nouvelle demande</a>
+            <a class="sidebar-link" href="${pageContext.request.contextPath}/demande/duplicata-transfert/recherche">Duplicata / Transfert</a>
             <a class="sidebar-link" href="#">Liste des demandes</a>
             <a class="sidebar-link" href="#">Demandeurs</a>
         </nav>
 
-        <div class="sidebar-footer">v1.0 - Sprint 1</div>
+        <div class="sidebar-footer">v2.0 - Sprint 2</div>
     </aside>
 
     <main class="main-content">
@@ -34,6 +35,17 @@
             </p>
             <a class="btn btn-primary" href="${pageContext.request.contextPath}/demande/nouveau/etape1">
                 Demarrer une demande de nouveau titre ->
+            </a>
+        </section>
+
+        <section class="card" style="margin-top: 2rem;">
+            <h2 style="margin-top: 0; color: var(--green);">Duplicata / Transfert (Sprint 2)</h2>
+            <p style="color: var(--gris-text); margin-bottom: 1.2rem;">
+                Creez rapidement une demande de Duplicata ou Transfert. La demande sera automatiquement
+                approuvee avec le statut "Titre délivré".
+            </p>
+            <a class="btn btn-primary" href="${pageContext.request.contextPath}/demande/duplicata-transfert/recherche">
+                Créer une demande Duplicata/Transfert ->
             </a>
         </section>
     </main>

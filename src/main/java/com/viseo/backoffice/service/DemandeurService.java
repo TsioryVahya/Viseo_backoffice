@@ -32,4 +32,26 @@ public class DemandeurService {
     public void deleteById(Integer id) {
         demandeurRepository.deleteById(id);
     }
+
+    /**
+     * Recherche les demandeurs par nom et prénom (insensible à la casse)
+     * 
+     * @param nom le nom du demandeur
+     * @param prenom le prénom du demandeur
+     * @return la liste des demandeurs correspondants
+     */
+    public List<Demandeur> findByNomAndPrenom(String nom, String prenom) {
+        return demandeurRepository.findByNomIgnoreCaseAndPrenomIgnoreCase(nom, prenom);
+    }
+
+    /**
+     * Recherche les demandeurs par nom et prénom avec recherche partielle (insensible à la casse)
+     * 
+     * @param nom le nom du demandeur (contient)
+     * @param prenom le prénom du demandeur (contient)
+     * @return la liste des demandeurs correspondants
+     */
+    public List<Demandeur> searchByNomAndPrenom(String nom, String prenom) {
+        return demandeurRepository.searchByNomAndPrenom(nom, prenom);
+    }
 }

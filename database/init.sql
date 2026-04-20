@@ -175,3 +175,13 @@ INSERT INTO Type_piece_specifique (libelle, id_type_visa, obligatoire) VALUES
 ('Contrat de travail', 2, TRUE),
 ('Autorisation de travail', 2, TRUE);
 
+-- =============================================
+-- DONNÉES DE TEST - DEMANDEURS
+-- =============================================
+
+INSERT INTO Demandeur (nom, prenom, date_naissance, lieu_naissance, telephone, email, adresse, id_situation_familiale, id_nationalite)
+VALUES ('Dupont', 'Sophie', '1988-03-22', 'Lyon', '0612345678', 'sophie.dupont@email.com', '456 Avenue de la Liberté, Lyon', 1, 1);
+
+INSERT INTO Demandeur (nom, prenom, date_naissance, lieu_naissance, telephone, email, adresse, id_situation_familiale, id_nationalite)
+VALUES ('Martin', 'Sophie', '1990-07-15', 'Marseille', '0623456789', 'sophie.martin@email.com', '789 Boulevard de la Mer, Marseille', 2, 1);
+
