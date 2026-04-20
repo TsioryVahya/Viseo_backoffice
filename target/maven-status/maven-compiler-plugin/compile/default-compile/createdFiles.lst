@@ -28,6 +28,7 @@ com\viseo\backoffice\repository\SituationFamilialeRepository.class
 com\viseo\backoffice\controller\HomeController.class
 com\viseo\backoffice\controller\TypePieceSpecifiqueController.class
 com\viseo\backoffice\controller\VisaController.class
+com\viseo\backoffice\controller\DuplicataTransfertController.class
 com\viseo\backoffice\controller\SituationFamilialeController.class
 com\viseo\backoffice\controller\VisaTransformableController.class
 com\viseo\backoffice\model\Demandeur.class
@@ -40,6 +41,7 @@ com\viseo\backoffice\repository\DemandeurRepository.class
 com\viseo\backoffice\model\PieceDemandeSpecifique.class
 com\viseo\backoffice\model\VisaTransformable.class
 com\viseo\backoffice\repository\TypeVisaRepository.class
+com\viseo\backoffice\service\Sprint2Service.class
 com\viseo\backoffice\model\TypePieceSpecifique.class
 com\viseo\backoffice\service\SituationFamilialeService.class
 com\viseo\backoffice\service\PieceDemandeSpecifiqueService.class
