@@ -13,6 +13,12 @@ public interface TypePieceSpecifiqueRepository extends JpaRepository<TypePieceSp
 
     Optional<TypePieceSpecifique> findById(Integer id);
 
+    List<TypePieceSpecifique> findByTypeVisa_Id(Integer idTypeVisa);
+
+    default List<TypePieceSpecifique> findByIdTypeVisa(Integer idTypeVisa) {
+        return findByTypeVisa_Id(idTypeVisa);
+    }
+
     TypePieceSpecifique save(TypePieceSpecifique entity);
 
     void deleteById(Integer id);

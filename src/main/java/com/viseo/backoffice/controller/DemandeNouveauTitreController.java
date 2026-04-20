@@ -1,6 +1,7 @@
 package com.viseo.backoffice.controller;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -12,6 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,6 +57,8 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/demande")
 public class DemandeNouveauTitreController {
+
+    private static final Logger log = LoggerFactory.getLogger(DemandeNouveauTitreController.class);
 
     private static final String SESSION_DEMANDEUR = "demandeur";
     private static final String SESSION_PASSEPORT = "passeport";
@@ -473,9 +478,61 @@ public class DemandeNouveauTitreController {
             return "demande/etape4";
         }
 
+        List<String> piecesObligatoiresManquantes = new ArrayList<>();
+
+        List<TypePieceCommune> toutesLesPiecesCommunes = typePieceCommuneService.findAll();
+        Map<Integer, Boolean> piecesCommunes = lireMapSession(session, SESSION_PIECES_COMMUNES);
+        for (TypePieceCommune piece : toutesLesPiecesCommunes) {
+            if (Boolean.TRUE.equals(piece.getObligatoire())) {
+                Boolean presente = piecesCommunes.get(piece.getId());
+                if (presente == null || !presente) {
+                    piecesObligatoiresManquantes.add("COMMUNE - " + piece.getLibelle());
+                    log.warn("Piece commune obligatoire manquante : [id={}] {}", piece.getId(), piece.getLibelle());
+                }
+            }
+        }
+
+        Integer typeVisaId = (Integer) session.getAttribute(SESSION_TYPE_VISA_ID);
+        List<TypePieceSpecifique> piecesSpecifiquesType = typeVisaId == null
+                ? Collections.emptyList()
+                : typePieceSpecifiqueService.findByTypeVisaId(typeVisaId);
+        Map<Integer, Boolean> piecesSpecifiques = lireMapSession(session, SESSION_PIECES_SPECIFIQUES);
+        for (TypePieceSpecifique piece : piecesSpecifiquesType) {
+            if (Boolean.TRUE.equals(piece.getObligatoire())) {
+                Boolean presente = piecesSpecifiques.get(piece.getId());
+                if (presente == null || !presente) {
+                    piecesObligatoiresManquantes.add("SPECIFIQUE - " + piece.getLibelle());
+                    log.warn("Piece specifique obligatoire manquante : [id={}] {} (typeVisa={})",
+                            piece.getId(), piece.getLibelle(), typeVisaId);
+                }
+            }
+        }
+
+        if (!piecesObligatoiresManquantes.isEmpty()) {
+            log.error("INSERTION ANNULEE — Demande refusee pour pieces obligatoires manquantes. Nombre de pieces manquantes : {}. Detail : {}",
+                    piecesObligatoiresManquantes.size(), String.join(" | ", piecesObligatoiresManquantes));
+
+            model.addAttribute("erreurPieces",
+                    "La demande ne peut pas etre soumise : " + piecesObligatoiresManquantes.size()
+                            + " piece(s) obligatoire(s) non presentee(s).");
+            model.addAttribute("listePiecesManquantes", piecesObligatoiresManquantes);
+
+            model.addAttribute("demandeur", session.getAttribute(SESSION_DEMANDEUR));
+            model.addAttribute("passeport", session.getAttribute(SESSION_PASSEPORT));
+            model.addAttribute("numeroReferenceVisa", session.getAttribute(SESSION_NUMERO_REFERENCE_VISA));
+            model.addAttribute("dateExpirationVisa", session.getAttribute(SESSION_DATE_EXPIRATION_VISA));
+            model.addAttribute("dateDemande", session.getAttribute(SESSION_DATE_DEMANDE));
+            model.addAttribute("typeVisaId", session.getAttribute(SESSION_TYPE_VISA_ID));
+            model.addAttribute("piecesCommunes", session.getAttribute(SESSION_PIECES_COMMUNES));
+            model.addAttribute("piecesSpecifiques", session.getAttribute(SESSION_PIECES_SPECIFIQUES));
+
+            return "demande/etape4";
+        }
+
+        log.info("Verification des pieces obligatoires : OK — Poursuite de l'insertion.");
+
         Demandeur demandeur = (Demandeur) session.getAttribute(SESSION_DEMANDEUR);
         Passeport passeport = (Passeport) session.getAttribute(SESSION_PASSEPORT);
-        Integer typeVisaId = (Integer) session.getAttribute(SESSION_TYPE_VISA_ID);
         Map<Integer, Boolean> piecesCommunesSelection = lireMapSession(session, SESSION_PIECES_COMMUNES);
         Map<Integer, Boolean> piecesSpecifiquesSelection = lireMapSession(session, SESSION_PIECES_SPECIFIQUES);
 
