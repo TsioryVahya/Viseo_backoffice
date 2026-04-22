@@ -60,7 +60,8 @@ public class DemandeNouveauTitreController {
 
     private static final Logger log = LoggerFactory.getLogger(DemandeNouveauTitreController.class);
 
-    private static final String SESSION_DEMANDEUR = "demandeur";
+    private static final String SESSION_DEMANDEUR = "demandeurSession";
+    private static final String SESSION_DEMANDE = "demandeSession";
     private static final String SESSION_PASSEPORT = "passeport";
     private static final String SESSION_TYPE_VISA_ID = "typeVisaId";
     private static final String SESSION_PIECES_COMMUNES = "piecesCommunes";
@@ -116,7 +117,7 @@ public class DemandeNouveauTitreController {
         this.statutDemandeTypeService = statutDemandeTypeService;
     }
 
-    @GetMapping("/nouveau/etape1")
+    @GetMapping({ "/nouveau/etape1", "/etape1" })
     public String afficherEtape1(Model model, HttpSession session) {
         initialiserModeleEtape1(model);
 
@@ -214,6 +215,12 @@ public class DemandeNouveauTitreController {
         demandeur.setSituationFamiliale(situationFamiliale.get());
 
         session.setAttribute(SESSION_DEMANDEUR, demandeur);
+        Demande demandeSession = lireDemandeSession(session);
+        demandeSession.setDemandeur(demandeur);
+        session.setAttribute(SESSION_DEMANDE, demandeSession);
+
+        // Toute modification des infos personnelles invalide les etapes suivantes.
+        reinitialiserEtapesSuivantes(session);
         return "redirect:/demande/nouveau/etape2";
     }
 
@@ -331,8 +338,11 @@ public class DemandeNouveauTitreController {
 
     @GetMapping("/nouveau/etape3a")
     public String afficherEtape3a(Model model, HttpSession session) {
-        if (session.getAttribute(SESSION_DEMANDEUR) == null || session.getAttribute(SESSION_PASSEPORT) == null) {
+        if (session.getAttribute(SESSION_DEMANDEUR) == null) {
             return "redirect:/demande/nouveau/etape1";
+        }
+        if (doitExigerEtape2(session) && !passeportEtVisaSaisis(session)) {
+            return "redirect:/demande/nouveau/etape2";
         }
 
         List<TypeVisa> typesVisa = typeVisaService.findAll();
@@ -357,8 +367,11 @@ public class DemandeNouveauTitreController {
             Model model,
             HttpSession session) {
 
-        if (session.getAttribute(SESSION_DEMANDEUR) == null || session.getAttribute(SESSION_PASSEPORT) == null) {
+        if (session.getAttribute(SESSION_DEMANDEUR) == null) {
             return "redirect:/demande/nouveau/etape1";
+        }
+        if (doitExigerEtape2(session) && !passeportEtVisaSaisis(session)) {
+            return "redirect:/demande/nouveau/etape2";
         }
 
         Map<String, String> erreurs = new HashMap<>();
@@ -399,14 +412,23 @@ public class DemandeNouveauTitreController {
         session.setAttribute(SESSION_TYPE_VISA_ID, typeVisaIdValue);
         session.setAttribute(SESSION_DATE_DEMANDE, dateDemandeParsee);
         session.setAttribute(SESSION_PIECES_COMMUNES, selection);
+
+        Demande demandeSession = lireDemandeSession(session);
+        demandeSession.setDateDemande(dateDemandeParsee);
+        demandeSession.setTypeVisa(typeVisa.orElse(null));
+        session.setAttribute(SESSION_DEMANDE, demandeSession);
+
         return "redirect:/demande/nouveau/etape3b";
     }
 
     @GetMapping("/nouveau/etape3b")
     public String afficherEtape3b(Model model, HttpSession session) {
         Integer typeVisaId = (Integer) session.getAttribute(SESSION_TYPE_VISA_ID);
-        if (session.getAttribute(SESSION_DEMANDEUR) == null || session.getAttribute(SESSION_PASSEPORT) == null || typeVisaId == null) {
+        if (session.getAttribute(SESSION_DEMANDEUR) == null || typeVisaId == null) {
             return "redirect:/demande/nouveau/etape1";
+        }
+        if (doitExigerEtape2(session) && !passeportEtVisaSaisis(session)) {
+            return "redirect:/demande/nouveau/etape2";
         }
 
         Optional<TypeVisa> typeVisa = typeVisaService.findById(typeVisaId);
@@ -429,8 +451,11 @@ public class DemandeNouveauTitreController {
             HttpSession session) {
 
         Integer typeVisaId = (Integer) session.getAttribute(SESSION_TYPE_VISA_ID);
-        if (session.getAttribute(SESSION_DEMANDEUR) == null || session.getAttribute(SESSION_PASSEPORT) == null || typeVisaId == null) {
+        if (session.getAttribute(SESSION_DEMANDEUR) == null || typeVisaId == null) {
             return "redirect:/demande/nouveau/etape1";
+        }
+        if (doitExigerEtape2(session) && !passeportEtVisaSaisis(session)) {
+            return "redirect:/demande/nouveau/etape2";
         }
 
         Optional<TypeVisa> typeVisa = typeVisaService.findById(typeVisaId);
@@ -451,6 +476,12 @@ public class DemandeNouveauTitreController {
 
     @GetMapping("/nouveau/etape4")
     public String afficherEtape4(Model model, HttpSession session) {
+        if (session.getAttribute(SESSION_DEMANDEUR) == null) {
+            return "redirect:/demande/nouveau/etape1";
+        }
+        if (doitExigerEtape2(session) && !passeportEtVisaSaisis(session)) {
+            return "redirect:/demande/nouveau/etape2";
+        }
         if (!chargerResumeDepuisSession(model, session)) {
             return "redirect:/demande/nouveau/etape1";
         }
@@ -461,6 +492,12 @@ public class DemandeNouveauTitreController {
 
     @PostMapping("/nouveau/etape4")
     public String traiterEtape4(Model model, HttpSession session) {
+        if (session.getAttribute(SESSION_DEMANDEUR) == null) {
+            return "redirect:/demande/nouveau/etape1";
+        }
+        if (doitExigerEtape2(session) && !passeportEtVisaSaisis(session)) {
+            return "redirect:/demande/nouveau/etape2";
+        }
         if (!chargerResumeDepuisSession(model, session)) {
             return "redirect:/demande/nouveau/etape1";
         }
@@ -536,19 +573,31 @@ public class DemandeNouveauTitreController {
         Map<Integer, Boolean> piecesCommunesSelection = lireMapSession(session, SESSION_PIECES_COMMUNES);
         Map<Integer, Boolean> piecesSpecifiquesSelection = lireMapSession(session, SESSION_PIECES_SPECIFIQUES);
 
+        boolean demandeurExistantAvantSauvegarde = demandeur != null && demandeur.getId() != null;
+
         Optional<TypeVisa> typeVisa = typeVisaService.findById(typeVisaId);
-        Optional<TypeDemande> typeDemande = typeDemandeService.findById(1);
-        Optional<StatutDemandeType> statutDemandeType = statutDemandeTypeService.findById(1);
+        Demande demandeSession = lireDemandeSession(session);
+        Optional<TypeDemande> typeDemande = Optional.empty();
+        if (demandeSession.getTypeDemande() != null && demandeSession.getTypeDemande().getId() != null) {
+            typeDemande = typeDemandeService.findById(demandeSession.getTypeDemande().getId());
+        }
+        if (typeDemande.isEmpty()) {
+            typeDemande = typeDemandeService.findById(1);
+        }
+
+        Optional<StatutDemandeType> statutDemandeType = choisirStatutInitial(
+                typeDemande.orElse(null),
+                demandeurExistantAvantSauvegarde);
 
         Map<String, String> erreurs = new HashMap<>();
         if (typeVisa.isEmpty()) {
             erreurs.put("global", "Le type de visa selectionne est introuvable.");
         }
         if (typeDemande.isEmpty()) {
-            erreurs.put("global", "La reference Type_demande id=1 est manquante.");
+            erreurs.put("global", "Le type de demande est introuvable pour la soumission.");
         }
         if (statutDemandeType.isEmpty()) {
-            erreurs.put("global", "La reference Statut_demande_type id=1 est manquante.");
+            erreurs.put("global", "Le statut initial de la demande est introuvable.");
         }
         if (numeroReferenceVisa == null || numeroReferenceVisa.isBlank()) {
             erreurs.put("global", "Le numero de reference du visa transformable est obligatoire.");
@@ -590,6 +639,8 @@ public class DemandeNouveauTitreController {
             demande.setTypeVisa(typeVisa.get());
             demande.setTypeDemande(typeDemande.get());
             demande.setVisaTransformable(visaTransformable);
+
+            session.setAttribute(SESSION_DEMANDE, demande);
             Demande savedDemande = demandeService.save(demande);
 
             StatutDemande statutDemande = new StatutDemande();
@@ -648,13 +699,13 @@ public class DemandeNouveauTitreController {
             return form;
         }
 
-        form.put("nom", demandeur.getNom());
-        form.put("prenom", demandeur.getPrenom());
+        form.put("nom", demandeur.getNom() == null ? "" : demandeur.getNom());
+        form.put("prenom", demandeur.getPrenom() == null ? "" : demandeur.getPrenom());
         form.put("dateNaissance", demandeur.getDateNaissance() == null ? "" : demandeur.getDateNaissance().toString());
-        form.put("lieuNaissance", demandeur.getLieuNaissance());
-        form.put("telephone", demandeur.getTelephone());
-        form.put("email", demandeur.getEmail());
-        form.put("adresse", demandeur.getAdresse());
+        form.put("lieuNaissance", demandeur.getLieuNaissance() == null ? "" : demandeur.getLieuNaissance());
+        form.put("telephone", demandeur.getTelephone() == null ? "" : demandeur.getTelephone());
+        form.put("email", demandeur.getEmail() == null ? "" : demandeur.getEmail());
+        form.put("adresse", demandeur.getAdresse() == null ? "" : demandeur.getAdresse());
         form.put("idNationalite", demandeur.getNationalite() == null ? "" : String.valueOf(demandeur.getNationalite().getId()));
         form.put("idSituationFamiliale", demandeur.getSituationFamiliale() == null ? "" : String.valueOf(demandeur.getSituationFamiliale().getId()));
         return form;
@@ -671,6 +722,96 @@ public class DemandeNouveauTitreController {
         form.put("dateExpiration", passeport.getDateExpiration() == null ? "" : passeport.getDateExpiration().toString());
         form.put("paysDelivrance", passeport.getPaysDelivrance());
         return form;
+    }
+
+    private Demande lireDemandeSession(HttpSession session) {
+        Object value = session.getAttribute(SESSION_DEMANDE);
+        if (value instanceof Demande demande) {
+            return demande;
+        }
+        return new Demande();
+    }
+
+    private boolean passeportEtVisaSaisis(HttpSession session) {
+        Object passeport = session.getAttribute(SESSION_PASSEPORT);
+        Object numeroReferenceVisa = session.getAttribute(SESSION_NUMERO_REFERENCE_VISA);
+        Object dateExpirationVisa = session.getAttribute(SESSION_DATE_EXPIRATION_VISA);
+
+        return passeport instanceof Passeport
+                && numeroReferenceVisa instanceof String numero
+                && !numero.isBlank()
+                && dateExpirationVisa instanceof LocalDate;
+    }
+
+    private boolean doitExigerEtape2(HttpSession session) {
+        Demande demandeSession = lireDemandeSession(session);
+        TypeDemande typeDemande = demandeSession.getTypeDemande();
+        if (typeDemande == null || typeDemande.getLibelle() == null) {
+            return true;
+        }
+
+        boolean duplicataOuTransfert = estDuplicataOuTransfert(typeDemande);
+        Demandeur demandeurSession = (Demandeur) session.getAttribute(SESSION_DEMANDEUR);
+        boolean demandeurNouveau = demandeurSession == null || demandeurSession.getId() == null;
+
+        if (duplicataOuTransfert) {
+            return demandeurNouveau;
+        }
+
+        return true;
+    }
+
+    private Optional<StatutDemandeType> choisirStatutInitial(TypeDemande typeDemande, boolean demandeurExistantAvantSauvegarde) {
+        if (estDuplicataOuTransfert(typeDemande) && demandeurExistantAvantSauvegarde) {
+            Optional<Integer> idTitreDelivre = statutDemandeTypeService.getIdStatutTitreDelivre();
+            if (idTitreDelivre.isPresent()) {
+                Optional<StatutDemandeType> statutTitreDelivre = statutDemandeTypeService.findById(idTitreDelivre.get());
+                if (statutTitreDelivre.isPresent()) {
+                    return statutTitreDelivre;
+                }
+            }
+        }
+
+        return premierStatutWorkflowVerification();
+    }
+
+    private Optional<StatutDemandeType> premierStatutWorkflowVerification() {
+        List<String> candidats = List.of(
+                "En attente de vérification",
+                "En attente de verification",
+                "Dossier creer",
+                "Dossier créé",
+                "Brouillon",
+                "Soumise");
+
+        for (String libelle : candidats) {
+            Optional<StatutDemandeType> statut = statutDemandeTypeService.findByLibelle(libelle);
+            if (statut.isPresent()) {
+                return statut;
+            }
+        }
+
+        return statutDemandeTypeService.findById(1);
+    }
+
+    private boolean estDuplicataOuTransfert(TypeDemande typeDemande) {
+        if (typeDemande == null || typeDemande.getLibelle() == null) {
+            return false;
+        }
+
+        String libelle = typeDemande.getLibelle().trim().toUpperCase();
+        return libelle.contains("DUPLICATA") || libelle.contains("TRANSFERT");
+    }
+
+    private void reinitialiserEtapesSuivantes(HttpSession session) {
+        session.removeAttribute(SESSION_PASSEPORT);
+        session.removeAttribute(SESSION_TYPE_VISA_ID);
+        session.removeAttribute(SESSION_PIECES_COMMUNES);
+        session.removeAttribute(SESSION_PIECES_SPECIFIQUES);
+        session.removeAttribute(SESSION_NUMERO_REFERENCE_VISA);
+        session.removeAttribute(SESSION_DATE_EXPIRATION_VISA);
+        session.removeAttribute(SESSION_DATE_DEMANDE);
+        session.removeAttribute(SESSION_AVERTISSEMENT_VISA);
     }
 
     private Integer toInteger(String value, String key, String requiredMessage, Map<String, String> erreurs) {
@@ -751,6 +892,7 @@ public class DemandeNouveauTitreController {
 
     private void viderSession(HttpSession session) {
         session.removeAttribute(SESSION_DEMANDEUR);
+        session.removeAttribute(SESSION_DEMANDE);
         session.removeAttribute(SESSION_PASSEPORT);
         session.removeAttribute(SESSION_TYPE_VISA_ID);
         session.removeAttribute(SESSION_PIECES_COMMUNES);
