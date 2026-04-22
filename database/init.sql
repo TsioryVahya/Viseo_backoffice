@@ -155,8 +155,8 @@ INSERT INTO Type_demande (libelle) VALUES ('Nouveau titre'), ('Duplicata'), ('Tr
 
 INSERT INTO Statut_demande_type (libelle, description) VALUES
 ('Dossier creer', 'Demande soumise, en attente de traitement'),
-('Pièces manquantes', 'Demande suspendue, des pièces sont manquantes ou invalides'),
-('Approuvée', 'Demande approuvée, titre en cours de préparation'),
+('Pieces manquantes', 'Demande suspendue, des pièces sont manquantes ou invalides'),
+('Scan terminer', 'Demande approuvée, titre en cours de préparation'),
 ('Rejetée', 'Demande rejetée'),
 ('Titre délivré', 'Le titre a été remis au demandeur');
 
