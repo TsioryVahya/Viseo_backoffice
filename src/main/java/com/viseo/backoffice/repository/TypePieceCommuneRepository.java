@@ -11,6 +11,8 @@ public interface TypePieceCommuneRepository extends JpaRepository<TypePieceCommu
 
     List<TypePieceCommune> findAll();
 
+    List<TypePieceCommune> findByObligatoire(Boolean obligatoire);
+
     Optional<TypePieceCommune> findById(Integer id);
 
     TypePieceCommune save(TypePieceCommune entity);

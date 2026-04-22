@@ -79,6 +79,57 @@ a {
     font-weight: 500;
 }
 
+.nav-groupe {
+    position: relative;
+}
+
+.nav-groupe-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.6rem 0.7rem;
+    border-radius: 8px;
+    cursor: default;
+}
+
+.nav-groupe:hover .nav-groupe-label,
+.nav-groupe-label.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--blanc);
+    font-weight: 500;
+}
+
+.sous-menu {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: calc(100% + 10px);
+    min-width: 180px;
+    background: #2f4a35;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 0.35rem;
+    z-index: 20;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+.nav-groupe:hover .sous-menu {
+    display: block;
+}
+
+.sous-menu a {
+    display: block;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 0.5rem 0.65rem;
+}
+
+.sous-menu a:hover,
+.sous-menu a.active {
+    background: rgba(255, 255, 255, 0.14);
+    color: var(--blanc);
+}
+
 .sidebar-footer {
     margin-top: auto;
     font-size: 0.8rem;
@@ -471,6 +522,12 @@ textarea:focus {
 
     .main-content {
         padding: 1.2rem;
+    }
+
+    .sous-menu {
+        position: static;
+        margin-top: 0.3rem;
+        border-color: rgba(255, 255, 255, 0.12);
     }
 
     .form-grid-2,

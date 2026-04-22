@@ -19,14 +19,7 @@ public interface DemandeurRepository extends JpaRepository<Demandeur, Integer> {
 
     void deleteById(Integer id);
 
-    /**
-     * Recherche les demandeurs par nom et prénom (insensible à la casse)
-     * 
-     * @param nom le nom du demandeur
-     * @param prenom le prénom du demandeur
-     * @return la liste des demandeurs correspondants
-     */
-    List<Demandeur> findByNomIgnoreCaseAndPrenomIgnoreCase(String nom, String prenom);
+    Optional<Demandeur> findByNomIgnoreCaseAndPrenomIgnoreCase(String nom, String prenom);
 
     /**
      * Recherche les demandeurs par nom et prénom avec recherche partielle (insensible à la casse)

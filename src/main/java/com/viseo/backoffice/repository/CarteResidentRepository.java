@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.viseo.backoffice.model.Demandeur;
 import com.viseo.backoffice.model.CarteResident;
 
 public interface CarteResidentRepository extends JpaRepository<CarteResident, Integer> {
@@ -12,6 +13,8 @@ public interface CarteResidentRepository extends JpaRepository<CarteResident, In
     List<CarteResident> findAll();
 
     Optional<CarteResident> findById(Integer id);
+
+    Optional<CarteResident> findFirstByPasseport_DemandeurOrderByDateFinDesc(Demandeur demandeur);
 
     CarteResident save(CarteResident entity);
 

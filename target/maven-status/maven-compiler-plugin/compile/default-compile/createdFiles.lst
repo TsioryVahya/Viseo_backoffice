@@ -48,6 +48,7 @@ com\viseo\backoffice\service\Sprint2Service.class
 com\viseo\backoffice\model\TypePieceSpecifique.class
 com\viseo\backoffice\service\SituationFamilialeService.class
 com\viseo\backoffice\service\PieceDemandeSpecifiqueService.class
+com\viseo\backoffice\service\TitreService.class
 com\viseo\backoffice\repository\VisaRepository.class
 com\viseo\backoffice\repository\StatutDemandeRepository.class
 com\viseo\backoffice\model\CarteResident.class
@@ -66,6 +67,7 @@ com\viseo\backoffice\service\VisaTransformableService.class
 com\viseo\backoffice\repository\PieceDemandeRepository.class
 com\viseo\backoffice\model\StatutDemandeType.class
 com\viseo\backoffice\service\StatutDemandeTypeService.class
+com\viseo\backoffice\controller\TitreController.class
 com\viseo\backoffice\repository\PasseportRepository.class
 com\viseo\backoffice\controller\DemandeNouveauTitreController.class
 com\viseo\backoffice\repository\TypeDemandeRepository.class

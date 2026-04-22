@@ -5,6 +5,7 @@ E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\mo
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\repository\VisaRepository.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\model\Nationalite.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\controller\StatutDemandeTypeController.java
+E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\controller\TitreController.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\repository\NationaliteRepository.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\service\PasseportService.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\repository\UploadPieceRepository.java
@@ -40,6 +41,7 @@ E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\co
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\controller\TypeDemandeController.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\service\TypeDemandeService.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\repository\StatutDemandeRepository.java
+E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\service\TitreService.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\service\CarteResidentService.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\model\StatutDemandeType.java
 E:\ETUDE\S6\Mr_Naina\VISA\Viseo_backoffice\src\main\java\com\viseo\backoffice\repository\TypePieceSpecifiqueRepository.java

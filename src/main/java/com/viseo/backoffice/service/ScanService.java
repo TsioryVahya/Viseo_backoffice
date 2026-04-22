@@ -203,9 +203,9 @@ public class ScanService {
         return result;
     }
 
-    public void changerStatut(Demande demande, Integer idStatutType) {
-        StatutDemandeType statutType = statutDemandeTypeRepository.findById(idStatutType)
-                .orElseThrow(() -> new IllegalArgumentException("Statut type introuvable: " + idStatutType));
+    public void changerStatut(Demande demande, String StatutType) {
+        StatutDemandeType statutType = statutDemandeTypeRepository.findByLibelle(StatutType)
+                .orElseThrow(() -> new IllegalArgumentException("Statut type introuvable: " + StatutType));
         StatutDemande statutDemande = new StatutDemande();
         statutDemande.setDemande(demande);
         statutDemande.setStatutDemandeType(statutType);
@@ -215,13 +215,13 @@ public class ScanService {
 
     public void evaluerStatutApresUpload(Demande demande) {
         if (!toutesLesPiecesUploadees(demande)) {
-            changerStatut(demande, 2);
+            changerStatut(demande, "Pieces manquantes");
         }
     }
 
     public boolean terminerScan(Demande demande) {
         if (getPiecesObligatoiresNonUploadees(demande).isEmpty()) {
-            changerStatut(demande, 6);
+            changerStatut(demande, "Scan termine");
             return true;
         }
         return false;
