@@ -1,5 +1,6 @@
 package com.viseo.backoffice.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -24,6 +25,8 @@ import com.viseo.backoffice.service.Sprint2Service;
 import com.viseo.backoffice.service.TypeDemandeService;
 import com.viseo.backoffice.service.TypeVisaService;
 
+import jakarta.servlet.http.HttpSession;
+
 /**
  * Contrôleur pour la gestion des demandes de Duplicata et Transfert (Sprint 2)
  * Permet de rechercher un demandeur existant ou en créer un nouveau avec approbation immédiate
@@ -31,6 +34,9 @@ import com.viseo.backoffice.service.TypeVisaService;
 @Controller
 @RequestMapping("/demande/duplicata-transfert")
 public class DuplicataTransfertController {
+
+    private static final String SESSION_DEMANDEUR = "demandeurSession";
+    private static final String SESSION_DEMANDE = "demandeSession";
 
     private final DemandeurService demandeurService;
     private final TypeDemandeService typeDemandeService;
@@ -72,7 +78,7 @@ public class DuplicataTransfertController {
     /**
      * Vérifie si un demandeur existe par nom et prénom
      * - Si trouvé : affiche ses infos et permet de confirmer
-     * - Si non trouvé : redirige vers le formulaire de création de nouveau dossier
+     * - Si non trouvé : préremplit l'étape 1 du nouveau titre avec nom/prénom en session
      */
     @PostMapping("/verifier")
     public String verifier(
@@ -80,7 +86,7 @@ public class DuplicataTransfertController {
             @RequestParam String prenom,
             @RequestParam Integer idTypeDemande,
             Model model,
-            RedirectAttributes redirectAttributes) {
+            HttpSession session) {
         
         // Rechercher le demandeur par nom et prénom
         List<Demandeur> demandeurs = demandeurService.searchByNomAndPrenom(nom, prenom);
@@ -104,12 +110,19 @@ public class DuplicataTransfertController {
             
             return "demande/duplicata-transfert/confirmation";
         } else {
-            // Demandeur non trouvé : rediriger vers formulaire de création
-            redirectAttributes.addFlashAttribute("message", 
-                    "Demandeur non trouvé. Veuillez créer un nouveau dossier.");
-            redirectAttributes.addAttribute("idTypeDemande", idTypeDemande);
-            
-            return "redirect:/demande/duplicata-transfert/formulaire";
+            // Demandeur non trouvé : démarrer le parcours nouveau titre avec un pré-remplissage minimal.
+            Demandeur nouveauDemandeur = new Demandeur();
+            nouveauDemandeur.setNom(nom == null ? "" : nom.trim());
+            nouveauDemandeur.setPrenom(prenom == null ? "" : prenom.trim());
+            session.setAttribute(SESSION_DEMANDEUR, nouveauDemandeur);
+
+            Demande nouvelleDemande = new Demande();
+            nouvelleDemande.setDemandeur(nouveauDemandeur);
+            nouvelleDemande.setDateDemande(LocalDate.now());
+            typeDemandeService.findById(idTypeDemande).ifPresent(nouvelleDemande::setTypeDemande);
+            session.setAttribute(SESSION_DEMANDE, nouvelleDemande);
+
+            return "redirect:/demande/etape1";
         }
     }
 
