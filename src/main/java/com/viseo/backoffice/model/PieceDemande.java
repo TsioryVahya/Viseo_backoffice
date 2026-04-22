@@ -28,6 +28,9 @@ public class PieceDemande {
     @Column(name = "presente", columnDefinition = "BOOLEAN")
     private Boolean presente;
 
+    @Column(name = "uploaded", columnDefinition = "BOOLEAN")
+    private Boolean uploaded = false;
+
     public Integer getId() {
         return id;
     }
@@ -58,5 +61,13 @@ public class PieceDemande {
 
     public void setPresente(Boolean presente) {
         this.presente = presente;
+    }
+
+    public Boolean getUploaded() {
+        return uploaded;
+    }
+
+    public void setUploaded(Boolean uploaded) {
+        this.uploaded = uploaded;
     }
 }

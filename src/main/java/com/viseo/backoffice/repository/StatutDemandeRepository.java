@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.viseo.backoffice.model.Demande;
 import com.viseo.backoffice.model.StatutDemande;
 
 public interface StatutDemandeRepository extends JpaRepository<StatutDemande, Integer> {
@@ -16,4 +17,8 @@ public interface StatutDemandeRepository extends JpaRepository<StatutDemande, In
     StatutDemande save(StatutDemande entity);
 
     void deleteById(Integer id);
+
+    Optional<StatutDemande> findFirstByDemande_IdOrderByDateChangementDesc(Integer demandeId);
+
+    Optional<StatutDemande> findFirstByDemandeOrderByDateChangementDesc(Demande demande);
 }

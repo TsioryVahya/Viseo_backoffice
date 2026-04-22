@@ -127,6 +127,7 @@ CREATE TABLE Piece_demande_specifique (
     UNIQUE (id_demande, id_type_piece)
 );
 
+
 -- =============================================
 -- UPLOAD_PIECE — nouvelle table
 -- =============================================
@@ -148,6 +149,7 @@ CREATE TABLE Upload_piece (
             (id_piece_demande IS NULL AND id_piece_demande_specifique IS NOT NULL)
         )
 );
+
 CREATE TABLE Visa (
     id SERIAL PRIMARY KEY,
     id_demande INT NOT NULL,
@@ -182,12 +184,13 @@ INSERT INTO type_visa (libelle) VALUES ('Investisseur'), ('Travailleur');
 
 INSERT INTO Type_demande (libelle) VALUES ('Nouveau titre'), ('Duplicata'), ('Transfert de visa');
 
-INSERT INTO Statut_demande_type (libelle, description) VALUES
-('Dossier creer', 'Demande soumise, en attente de traitement'),
-('Pieces manquantes', 'Demande suspendue, des pièces sont manquantes ou invalides'),
-('Scan terminer', 'Demande approuvée, titre en cours de préparation'),
-('Rejetée', 'Demande rejetée'),
-('Titre délivré', 'Le titre a été remis au demandeur');
+INSERT INTO Statut_demande_type (id, libelle, description) VALUES
+(1, 'Dossier créé', 'Demande soumise, en attente de traitement'),
+(2, 'Pièces manquantes', 'Demande suspendue, des pièces sont manquantes ou invalides'),
+(3, 'En cours de traitement', 'Dossier en cours de traitement'),
+(4, 'Rejetée', 'Demande rejetée'),
+(5, 'Titre délivré', 'Le titre a été remis au demandeur'),
+(6, 'Scan terminé', 'Scan des pièces terminé');
 
 INSERT INTO Type_piece_commune (libelle, obligatoire) VALUES
 ('02 photos d''identité récentes', TRUE),
