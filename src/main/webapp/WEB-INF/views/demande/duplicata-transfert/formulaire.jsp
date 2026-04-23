@@ -9,22 +9,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/styles.css">
 </head>
 <body>
-<c:set var="activeMenu" value="duplicata-transfert" />
-
 <div class="app-layout">
-    <aside class="sidebar">
-        <div class="sidebar-logo">Viseo Backoffice</div>
-        <div class="sidebar-separator"></div>
-
-        <nav class="sidebar-nav">
-            <a class="sidebar-link ${activeMenu == 'nouvelle-demande' ? 'active' : ''}" href="${pageContext.request.contextPath}/demande/nouveau/etape1">Nouvelle demande</a>
-            <a class="sidebar-link ${activeMenu == 'duplicata-transfert' ? 'active' : ''}" href="${pageContext.request.contextPath}/demande/duplicata-transfert/recherche">Duplicata / Transfert</a>
-            <a class="sidebar-link ${activeMenu == 'liste-demandes' ? 'active' : ''}" href="#">Liste des demandes</a>
-            <a class="sidebar-link ${activeMenu == 'demandeurs' ? 'active' : ''}" href="#">Demandeurs</a>
-        </nav>
-
-        <div class="sidebar-footer">v2.0 - Sprint 2</div>
-    </aside>
+    <jsp:include page="/WEB-INF/views/layout/navbar.jsp" />
 
     <main class="main-content">
         <h1 class="page-title">Demande de Duplicata / Transfert</h1>

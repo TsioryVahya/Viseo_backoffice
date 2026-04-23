@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.viseo.backoffice.model.Demande;
 import com.viseo.backoffice.model.PieceDemande;
 
 public interface PieceDemandeRepository extends JpaRepository<PieceDemande, Integer> {
@@ -16,4 +17,6 @@ public interface PieceDemandeRepository extends JpaRepository<PieceDemande, Inte
     PieceDemande save(PieceDemande entity);
 
     void deleteById(Integer id);
+
+    List<PieceDemande> findByDemande(Demande demande);
 }

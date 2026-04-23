@@ -99,26 +99,55 @@ CREATE TABLE Type_piece_specifique (
     FOREIGN KEY (id_type_visa) REFERENCES type_visa(id)
 );
 
+-- =============================================
+-- PIECE_DEMANDE — modifiée
+-- =============================================
 CREATE TABLE Piece_demande (
     id SERIAL PRIMARY KEY,
     id_demande INT NOT NULL,
     id_type_piece_commune INT NOT NULL,
     presente BOOLEAN DEFAULT FALSE,
+    uploaded BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (id_demande) REFERENCES Demande(id),
     FOREIGN KEY (id_type_piece_commune) REFERENCES Type_piece_commune(id),
     UNIQUE (id_demande, id_type_piece_commune)
 );
 
+-- =============================================
+-- PIECE_DEMANDE_SPECIFIQUE — modifiée
+-- =============================================
 CREATE TABLE Piece_demande_specifique (
     id SERIAL PRIMARY KEY,
     id_demande INT NOT NULL,
     id_type_piece INT NOT NULL,
     presente BOOLEAN DEFAULT FALSE,
+    uploaded BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (id_demande) REFERENCES Demande(id),
     FOREIGN KEY (id_type_piece) REFERENCES Type_piece_specifique(id),
     UNIQUE (id_demande, id_type_piece)
 );
 
+-- =============================================
+-- UPLOAD_PIECE — nouvelle table
+-- =============================================
+CREATE TABLE Upload_piece (
+    id SERIAL PRIMARY KEY,
+    id_piece_demande INT,
+    id_piece_demande_specifique INT,
+    chemin_fichier VARCHAR(255) NOT NULL,
+    nom_fichier_original VARCHAR(255) NOT NULL,
+    date_upload DATE NOT NULL,
+    FOREIGN KEY (id_piece_demande)
+        REFERENCES Piece_demande(id),
+    FOREIGN KEY (id_piece_demande_specifique)
+        REFERENCES Piece_demande_specifique(id),
+    CONSTRAINT check_piece_type
+        CHECK (
+            (id_piece_demande IS NOT NULL AND id_piece_demande_specifique IS NULL)
+            OR
+            (id_piece_demande IS NULL AND id_piece_demande_specifique IS NOT NULL)
+        )
+);
 CREATE TABLE Visa (
     id SERIAL PRIMARY KEY,
     id_demande INT NOT NULL,

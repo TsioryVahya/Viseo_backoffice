@@ -1,7 +1,7 @@
-\c postgres
 
 DROP TABLE IF EXISTS carte_resident CASCADE;
 DROP TABLE IF EXISTS visa CASCADE;
+DROP TABLE IF EXISTS upload_piece CASCADE;
 DROP TABLE IF EXISTS piece_demande_specifique CASCADE;
 DROP TABLE IF EXISTS piece_demande CASCADE;
 DROP TABLE IF EXISTS statut_demande CASCADE;
@@ -16,6 +16,3 @@ DROP TABLE IF EXISTS type_demande CASCADE;
 DROP TABLE IF EXISTS type_visa CASCADE;
 DROP TABLE IF EXISTS situation_familiale CASCADE;
 DROP TABLE IF EXISTS nationalite CASCADE;
-
-CREATE DATABASE viseo;
-\c viseo;

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.viseo.backoffice.model.Demandeur;
 import com.viseo.backoffice.model.Visa;
 
 public interface VisaRepository extends JpaRepository<Visa, Integer> {
@@ -12,6 +13,8 @@ public interface VisaRepository extends JpaRepository<Visa, Integer> {
     List<Visa> findAll();
 
     Optional<Visa> findById(Integer id);
+
+    Optional<Visa> findFirstByPasseport_DemandeurOrderByDateFinDesc(Demandeur demandeur);
 
     Visa save(Visa entity);
 

@@ -41,7 +41,9 @@ public class DemandeurService {
      * @return la liste des demandeurs correspondants
      */
     public List<Demandeur> findByNomAndPrenom(String nom, String prenom) {
-        return demandeurRepository.findByNomIgnoreCaseAndPrenomIgnoreCase(nom, prenom);
+        return demandeurRepository.findByNomIgnoreCaseAndPrenomIgnoreCase(nom, prenom)
+                .map(List::of)
+                .orElseGet(List::of);
     }
 
     /**
