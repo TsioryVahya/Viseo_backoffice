@@ -330,11 +330,13 @@ public class TitreController {
             Model model) {
         String typeDemande = (String) session.getAttribute("typeDemande");
         LocalDate dateExpirationVisa = (LocalDate) session.getAttribute("dateExpirationVisa");
+        Integer typeVisaIdSession = (Integer) session.getAttribute("typeVisaId");
+        Integer typeVisaIdEffectif = typeVisaId != null ? typeVisaId : typeVisaIdSession;
 
         Map<Integer, Boolean> piecesCommunes = titreService.extractPiecesFromParams(params, "pieceCommune_");
         Map<String, String> erreurs = titreService.validerEtape3a(
                 typeDemande,
-                typeVisaId,
+                typeVisaIdEffectif,
                 dateDemande,
                 dateExpirationVisa,
                 piecesCommunes,
@@ -344,9 +346,9 @@ public class TitreController {
             model.addAttribute("typesVisa", titreService.findAllTypesVisa());
             model.addAttribute("piecesCommunes", titreService.findAllPiecesCommunes());
             model.addAttribute("typeDemande", typeDemande);
-            model.addAttribute("typeVisaId", typeVisaId);
-            if ("duplicata".equals(typeDemande) && typeVisaId != null) {
-                model.addAttribute("typeVisaLibelle", titreService.findTypeVisaLibelleById(typeVisaId));
+            model.addAttribute("typeVisaId", typeVisaIdEffectif);
+            if ("duplicata".equals(typeDemande) && typeVisaIdEffectif != null) {
+                model.addAttribute("typeVisaLibelle", titreService.findTypeVisaLibelleById(typeVisaIdEffectif));
             }
             model.addAttribute("piecesChecked", piecesCommunes);
             model.addAttribute("dateDemande", dateDemande);
@@ -355,7 +357,7 @@ public class TitreController {
             return "titre/etape3a";
         }
 
-        session.setAttribute("typeVisaId", typeVisaId);
+        session.setAttribute("typeVisaId", typeVisaIdEffectif);
         session.setAttribute("dateDemande", dateDemande);
         session.setAttribute("piecesCommunes", piecesCommunes);
         return "redirect:/demande/autre/etape3b";
@@ -364,6 +366,17 @@ public class TitreController {
     @GetMapping("/etape3b")
     public String etape3b(HttpSession session, Model model) {
         Integer typeVisaId = (Integer) session.getAttribute("typeVisaId");
+        if (typeVisaId == null) {
+            model.addAttribute("erreur", "Type de visa introuvable. Revenez a l'etape precedente.");
+            model.addAttribute("typesVisa", titreService.findAllTypesVisa());
+            model.addAttribute("piecesCommunes", titreService.findAllPiecesCommunes());
+            model.addAttribute("typeDemande", session.getAttribute("typeDemande"));
+            model.addAttribute("piecesChecked", session.getAttribute("piecesCommunes"));
+            model.addAttribute("dateDemande", session.getAttribute("dateDemande"));
+            model.addAttribute("etapeActuelle", 4);
+            model.addAttribute("menuActif", "nouvelle-demande");
+            return "titre/etape3a";
+        }
         model.addAttribute("piecesSpecifiques", titreService.findPiecesSpecifiquesByTypeVisa(typeVisaId));
         model.addAttribute("typeVisaId", typeVisaId);
         model.addAttribute("typeVisaLibelle", titreService.findTypeVisaLibelleById(typeVisaId));

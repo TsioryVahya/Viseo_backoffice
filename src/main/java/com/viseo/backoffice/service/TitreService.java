@@ -159,6 +159,9 @@ public class TitreService {
     }
 
     public String findTypeVisaLibelleById(Integer id) {
+        if (id == null) {
+            return "";
+        }
         return typeVisaRepository.findById(id)
                 .map(TypeVisa::getLibelle)
                 .orElse("");
@@ -748,6 +751,9 @@ public class TitreService {
     }
 
     public List<TypePieceSpecifique> findPiecesSpecifiquesByTypeVisa(Integer typeVisaId) {
+        if (typeVisaId == null) {
+            return List.of();
+        }
         return typePieceSpecifiqueRepository.findByIdTypeVisa(typeVisaId);
     }
 
