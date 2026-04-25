@@ -41,7 +41,7 @@ public class DemandeController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Integer id, Model model) {
-        demandeService.findById(id).ifPresent(entity -> model.addAttribute("entity", entity));
+        model.addAttribute("entity", demandeService.findById(id));
         return "demandes/detail";
     }
 

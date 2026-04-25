@@ -201,3 +201,44 @@ ORDER BY date_dernier_statut DESC;
 -- USAGE :
 -- SELECT * FROM vue_demandes_a_scanner;
 -- SELECT * FROM vue_demandes_a_scanner WHERE type_visa = 'Investisseur';
+
+-- Vue statut actuel d'un visa
+CREATE VIEW vue_statut_actuel_visa AS
+SELECT DISTINCT ON (sv.id_visa)
+    sv.id_visa,
+    sv.id_statut_type,
+    stt.libelle AS statut_actuel,
+    sv.date_changement,
+    sv.commentaire
+FROM Statut_visa sv
+JOIN Statut_titre_type stt ON stt.id = sv.id_statut_type
+ORDER BY sv.id_visa, sv.date_changement DESC;
+
+-- Vue statut actuel d'une carte resident
+CREATE VIEW vue_statut_actuel_carte AS
+SELECT DISTINCT ON (sc.id_carte_resident)
+    sc.id_carte_resident,
+    sc.id_statut_type,
+    stt.libelle AS statut_actuel,
+    sc.date_changement,
+    sc.commentaire
+FROM Statut_carte_resident sc
+JOIN Statut_titre_type stt ON stt.id = sc.id_statut_type
+ORDER BY sc.id_carte_resident, sc.date_changement DESC;
+
+-- Vue demandes avec leurs liens
+CREATE VIEW vue_demandes_liees AS
+SELECT
+    d.id AS id_demande,
+    d.date_demande,
+    td.libelle AS type_demande,
+    vsa.statut_actuel,
+    dl.id_demande_origine,
+    dl.type_lien,
+    d_origine.date_demande AS date_demande_origine
+FROM Demande d
+JOIN Type_demande td ON td.id = d.id_type_demande
+JOIN vue_statut_actuel_demande vsa ON vsa.id_demande = d.id
+LEFT JOIN Demande_liee dl ON dl.id_demande_liee = d.id
+LEFT JOIN Demande d_origine ON d_origine.id = dl.id_demande_origine
+ORDER BY d.date_demande DESC;

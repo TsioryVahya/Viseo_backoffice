@@ -108,7 +108,7 @@ public class Sprint2Service {
         }
 
         // 4. Vérifier que le type de demande est valide
-        Optional<TypeDemande> typeDemande = typeDemandeService.findById(idTypeDemande);
+        Optional<TypeDemande> typeDemande = typeDemandeService.findOptionalById(idTypeDemande);
         if (typeDemande.isEmpty()) {
             throw new IllegalArgumentException("Type de demande non trouvé avec l'ID : " + idTypeDemande);
         }
