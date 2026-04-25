@@ -91,23 +91,35 @@ public class DuplicataController {
             if ("Duplicata".equals(typeDemande.getLibelle())) {
                 return "redirect:/duplicata/demandeur-trouve";
             }
+
             if ("Transfert de visa".equals(typeDemande.getLibelle())) {
-                model.addAttribute("info", "Le transfert de visa est en cours de developpement.");
-                model.addAttribute("typesDemande", typeDemandeService.findAllSaufNouveauTitre());
+                // Cas trouvé transfert — à implémenter plus tard
+                model.addAttribute("info",
+                    "Transfert pour demandeur existant : en cours de developpement.");
+                model.addAttribute("typesDemande",
+                    typeDemandeService.findAllSaufNouveauTitre());
                 model.addAttribute("menuActif", "renouvellement");
                 return "duplicata/recherche";
             }
         }
 
+        // Par :
         session.setAttribute("demandeurTrouve", false);
-        log.info("Demandeur non trouve - demarrage flux complet");
+        log.info("Demandeur non trouve - demarrage flux complet typedemande={}",
+            typeDemande.getLibelle());
 
         if ("Duplicata".equals(typeDemande.getLibelle())) {
             return "redirect:/duplicata/etape1";
         }
+        if ("Transfert de visa".equals(typeDemande.getLibelle())) {
+            return "redirect:/transfert/etape1";
+        }
 
-        model.addAttribute("info", "Ce type de demande est en cours de developpement.");
-        model.addAttribute("typesDemande", typeDemandeService.findAllSaufNouveauTitre());
+        // Fallback sécurité
+        model.addAttribute("info",
+            "Ce type de demande est en cours de developpement.");
+        model.addAttribute("typesDemande",
+            typeDemandeService.findAllSaufNouveauTitre());
         model.addAttribute("menuActif", "renouvellement");
         return "duplicata/recherche";
     }
