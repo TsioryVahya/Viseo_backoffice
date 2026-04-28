@@ -31,7 +31,7 @@
 
         <div class="card">
             <form method="post"
-                  action="${pageContext.request.contextPath}/transfert/etape5">
+                  action="${pageContext.request.contextPath}/duplicata/etape5">
 
                 <div class="form-group">
                     <label for="reference">Référence du visa *</label>

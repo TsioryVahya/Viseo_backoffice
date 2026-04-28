@@ -27,7 +27,7 @@
 
         <div class="card">
             <form method="post"
-                  action="${pageContext.request.contextPath}/transfert/etape6">
+                  action="${pageContext.request.contextPath}/duplicata/etape6">
 
                 <div class="form-group">
                     <label for="numeroPasseport">

@@ -1,5 +1,6 @@
 package com.viseo.backoffice.service;
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,48 +22,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.viseo.backoffice.model.CarteResident;
-import com.viseo.backoffice.model.Demande;
-import com.viseo.backoffice.model.DemandeLiee;
-import com.viseo.backoffice.model.Demandeur;
-import com.viseo.backoffice.model.Nationalite;
-import com.viseo.backoffice.model.Passeport;
-import com.viseo.backoffice.model.PieceDemande;
-import com.viseo.backoffice.model.PieceDemandeSpecifique;
-import com.viseo.backoffice.model.SituationFamiliale;
-import com.viseo.backoffice.model.StatutCarteResident;
-import com.viseo.backoffice.model.StatutDemande;
-import com.viseo.backoffice.model.StatutDemandeType;
-import com.viseo.backoffice.model.StatutTitreType;
-import com.viseo.backoffice.model.StatutVisa;
-import com.viseo.backoffice.model.TypeDemande;
-import com.viseo.backoffice.model.TypePieceCommune;
-import com.viseo.backoffice.model.TypePieceSpecifique;
-import com.viseo.backoffice.model.TypeVisa;
-import com.viseo.backoffice.model.UploadPiece;
-import com.viseo.backoffice.model.Visa;
-import com.viseo.backoffice.model.VisaTransformable;
-import com.viseo.backoffice.repository.CarteResidentRepository;
-import com.viseo.backoffice.repository.DemandeLieeRepository;
-import com.viseo.backoffice.repository.DemandeRepository;
-import com.viseo.backoffice.repository.DemandeurRepository;
-import com.viseo.backoffice.repository.NationaliteRepository;
-import com.viseo.backoffice.repository.PasseportRepository;
-import com.viseo.backoffice.repository.PieceDemandeRepository;
-import com.viseo.backoffice.repository.PieceDemandeSpecifiqueRepository;
-import com.viseo.backoffice.repository.SituationFamilialeRepository;
-import com.viseo.backoffice.repository.StatutCarteResidentRepository;
-import com.viseo.backoffice.repository.StatutDemandeRepository;
-import com.viseo.backoffice.repository.StatutDemandeTypeRepository;
-import com.viseo.backoffice.repository.StatutTitreTypeRepository;
-import com.viseo.backoffice.repository.TypeDemandeRepository;
-import com.viseo.backoffice.repository.TypePieceCommuneRepository;
-import com.viseo.backoffice.repository.TypePieceSpecifiqueRepository;
-import com.viseo.backoffice.repository.TypeVisaRepository;
-import com.viseo.backoffice.repository.UploadPieceRepository;
-import com.viseo.backoffice.repository.VisaTransformableRepository;
+import com.viseo.backoffice.model.*;
+import com.viseo.backoffice.repository.*;
+
 
 import jakarta.persistence.EntityNotFoundException;
+
 
 @Service
 public class DuplicataService {

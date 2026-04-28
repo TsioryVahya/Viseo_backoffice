@@ -29,8 +29,9 @@ import com.viseo.backoffice.model.TypeDemande;
 import com.viseo.backoffice.model.TypePieceCommune;
 import com.viseo.backoffice.model.TypePieceSpecifique;
 import com.viseo.backoffice.model.UploadPiece;
-import com.viseo.backoffice.service.DuplicataService;
-import com.viseo.backoffice.service.TypeDemandeService;
+import com.viseo.backoffice.model.Visa;
+import com.viseo.backoffice.service.*;
+
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -43,10 +44,12 @@ public class DuplicataController {
 
     private final DuplicataService duplicataService;
     private final TypeDemandeService typeDemandeService;
+    private final TransfertService transfertService;
 
-    public DuplicataController(DuplicataService duplicataService, TypeDemandeService typeDemandeService) {
+    public DuplicataController(DuplicataService duplicataService, TypeDemandeService typeDemandeService, TransfertService transfertService) {
         this.duplicataService = duplicataService;
         this.typeDemandeService = typeDemandeService;
+        this.transfertService = transfertService;
     }
 
     @GetMapping("/recherche")
@@ -63,14 +66,17 @@ public class DuplicataController {
             @RequestParam String numeroPasseport,
             @RequestParam(required = false) Integer typeDemandeId,
             HttpSession session,
-            Model model) {
-        Map<String, String> erreurs = duplicataService.validerRecherche(nom, prenom, numeroPasseport);
+            Model model) {  
+
+        Map<String, String> erreurs =
+            duplicataService.validerRecherche(nom, prenom, numeroPasseport);
         if (typeDemandeId == null) {
             erreurs.put("typeDemandeId", "Veuillez choisir un type de demande.");
         }
         if (!erreurs.isEmpty()) {
             model.addAttribute("erreurs", erreurs);
-            model.addAttribute("typesDemande", typeDemandeService.findAllSaufNouveauTitre());
+            model.addAttribute("typesDemande",
+                typeDemandeService.findAllSaufNouveauTitre());
             model.addAttribute("menuActif", "duplicata");
             return "duplicata/recherche";
         }
@@ -79,23 +85,31 @@ public class DuplicataController {
         session.setAttribute("typeDemandeId", typeDemandeId);
         session.setAttribute("typeDemandeLibelle", typeDemande.getLibelle());
 
-        Optional<Demandeur> demandeur = duplicataService.rechercherDemandeur(nom, prenom, numeroPasseport);
-        Optional<Passeport> passeport = duplicataService.findPasseportByNumero(numeroPasseport);
+        Optional<Demandeur> demandeur =
+            duplicataService.rechercherDemandeur(nom, prenom, numeroPasseport);
+        Optional<Passeport> passeport =
+            duplicataService.findPasseportByNumero(numeroPasseport);
 
+        // ══════════════════════════════════════
+        // CAS TROUVÉ
+        // ══════════════════════════════════════
         if (demandeur.isPresent() && passeport.isPresent()) {
             session.setAttribute("demandeurTrouve", true);
-            session.setAttribute("idDemandeurExistant", demandeur.get().getId());
-            session.setAttribute("idPasseportExistant", passeport.get().getId());
-            log.info("Demandeur trouve - id={} typedemande={}", demandeur.get().getId(), typeDemande.getLibelle());
+            session.setAttribute("idDemandeurExistant",
+                demandeur.get().getId());
+            session.setAttribute("idPasseportExistant",
+                passeport.get().getId());
+            log.info("Demandeur trouve - id={} typedemande={}",
+                demandeur.get().getId(), typeDemande.getLibelle());
 
             if ("Duplicata".equals(typeDemande.getLibelle())) {
                 return "redirect:/duplicata/demandeur-trouve";
             }
-
             if ("Transfert de visa".equals(typeDemande.getLibelle())) {
-                // Cas trouvé transfert — à implémenter plus tard
+                // À implémenter plus tard
                 model.addAttribute("info",
-                    "Transfert pour demandeur existant : en cours de developpement.");
+                    "Transfert pour demandeur existant : " +
+                    "en cours de developpement.");
                 model.addAttribute("typesDemande",
                     typeDemandeService.findAllSaufNouveauTitre());
                 model.addAttribute("menuActif", "renouvellement");
@@ -103,16 +117,16 @@ public class DuplicataController {
             }
         }
 
-        // Par :
+        // ══════════════════════════════════════
+        // CAS NON TROUVÉ — même route pour les deux
+        // ══════════════════════════════════════
         session.setAttribute("demandeurTrouve", false);
         log.info("Demandeur non trouve - demarrage flux complet typedemande={}",
             typeDemande.getLibelle());
 
-        if ("Duplicata".equals(typeDemande.getLibelle())) {
-            return "redirect:/duplicata/etape1";
-        }
-        if ("Transfert de visa".equals(typeDemande.getLibelle())) {
-            return "redirect:/transfert/etape1";
+        if ("Duplicata".equals(typeDemande.getLibelle())
+                || "Transfert de visa".equals(typeDemande.getLibelle())) {
+            return "redirect:/duplicata/etape1"; // ← même route pour les deux
         }
 
         // Fallback sécurité
@@ -429,40 +443,91 @@ public class DuplicataController {
     }
 
     @GetMapping("/etape5")
-    public String etape5(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-        Integer idDemande = (Integer) session.getAttribute("idDemandeNouveauTitre");
+    public String etape5(
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        Integer idDemande =
+            (Integer) session.getAttribute("idDemandeNouveauTitre");
         Demande demande = duplicataService.findDemandeById(idDemande);
 
-        List<String> manquantes = duplicataService.getPiecesObligatoiresNonUploadees(demande);
+        List<String> manquantes =
+            duplicataService.getPiecesObligatoiresNonUploadees(demande);
         if (!manquantes.isEmpty()) {
             log.warn("Acces etape5 bloque - manquantes={}", manquantes);
-            redirectAttributes.addFlashAttribute("erreur", "Uploadez toutes les pieces obligatoires avant de continuer.");
+            redirectAttributes.addFlashAttribute("erreur",
+                "Uploadez toutes les pieces obligatoires avant de continuer.");
             return "redirect:/duplicata/etape4";
         }
 
-        model.addAttribute("reference", session.getAttribute("referenceNouveauTitre"));
-        model.addAttribute("dateDebut", session.getAttribute("dateDebutNouveauTitre"));
-        model.addAttribute("dateFin", session.getAttribute("dateFinNouveauTitre"));
+        String typeDemandeLibelle =
+            (String) session.getAttribute("typeDemandeLibelle");
+
+        // ← Point de divergence
+        if ("Transfert de visa".equals(typeDemandeLibelle)) {
+            model.addAttribute("reference",
+                session.getAttribute("referenceAncienVisa"));
+            model.addAttribute("dateDebut",
+                session.getAttribute("dateDebutAncienVisa"));
+            model.addAttribute("dateFin",
+                session.getAttribute("dateFinAncienVisa"));
+            model.addAttribute("menuActif", "renouvellement");
+            model.addAttribute("etapeActuelle", 5);
+            return "transfert/etape5_ancien_visa"; // ← JSP transfert
+        }
+
+        // Duplicata — comportement existant
+        model.addAttribute("reference",
+            session.getAttribute("referenceNouveauTitre"));
+        model.addAttribute("dateDebut",
+            session.getAttribute("dateDebutNouveauTitre"));
+        model.addAttribute("dateFin",
+            session.getAttribute("dateFinNouveauTitre"));
         model.addAttribute("menuActif", "duplicata");
         model.addAttribute("etapeActuelle", 5);
-        return "duplicata/etape5";
+        return "duplicata/etape5"; // ← JSP duplicata
     }
 
     @PostMapping("/etape5")
     public String traiterEtape5(
             @RequestParam String reference,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin,
+            @RequestParam(required = false)
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                LocalDate dateDebut,
+            @RequestParam(required = false)
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                LocalDate dateFin,
             HttpSession session,
             Model model) {
-        Map<String, String> erreurs = duplicataService.validerInfosTitre(reference, dateDebut, dateFin);
+
+        String typeDemandeLibelle =
+            (String) session.getAttribute("typeDemandeLibelle");
+
+        if ("Transfert de visa".equals(typeDemandeLibelle)) {
+            Map<String, String> erreurs =
+                transfertService.validerAncienVisa(reference, dateDebut, dateFin);
+            if (!erreurs.isEmpty()) {
+                model.addAttribute("erreurs", erreurs);
+                model.addAttribute("menuActif", "renouvellement");
+                model.addAttribute("etapeActuelle", 5);
+                return "transfert/etape5_ancien_visa";
+            }
+            session.setAttribute("referenceAncienVisa", reference);
+            session.setAttribute("dateDebutAncienVisa", dateDebut);
+            session.setAttribute("dateFinAncienVisa", dateFin);
+            return "redirect:/duplicata/etape6";
+        }
+
+        // Duplicata — comportement existant
+        Map<String, String> erreurs =
+            duplicataService.validerInfosTitre(reference, dateDebut, dateFin);
         if (!erreurs.isEmpty()) {
             model.addAttribute("erreurs", erreurs);
             model.addAttribute("menuActif", "duplicata");
             model.addAttribute("etapeActuelle", 5);
             return "duplicata/etape5";
         }
-
         session.setAttribute("referenceNouveauTitre", reference);
         session.setAttribute("dateDebutNouveauTitre", dateDebut);
         session.setAttribute("dateFinNouveauTitre", dateFin);
@@ -471,38 +536,92 @@ public class DuplicataController {
 
     @GetMapping("/etape6")
     public String etape6(HttpSession session, Model model) {
-        model.addAttribute("referenceAncienne", session.getAttribute("referenceAncienneCarte"));
-        model.addAttribute("dateDebutAncienne", session.getAttribute("dateDebutAncienneCarte"));
-        model.addAttribute("dateFinAncienne", session.getAttribute("dateFinAncienneCarte"));
+        String typeDemandeLibelle =
+            (String) session.getAttribute("typeDemandeLibelle");
+
+        if ("Transfert de visa".equals(typeDemandeLibelle)) {
+            model.addAttribute("numeroPasseport",
+                session.getAttribute("nouveauNumeroPasseport"));
+            model.addAttribute("dateDelivrance",
+                session.getAttribute("nouvelleDateDelivrance"));
+            model.addAttribute("dateExpiration",
+                session.getAttribute("nouvelleDateExpiration"));
+            model.addAttribute("paysDelivrance",
+                session.getAttribute("nouveauPaysDelivrance"));
+            model.addAttribute("menuActif", "renouvellement");
+            model.addAttribute("etapeActuelle", 6);
+            return "transfert/etape6_nouveau_passeport";
+        }
+
+        // Duplicata — comportement existant
+        model.addAttribute("referenceAncienne",
+            session.getAttribute("referenceAncienneCarte"));
+        model.addAttribute("dateDebutAncienne",
+            session.getAttribute("dateDebutAncienneCarte"));
+        model.addAttribute("dateFinAncienne",
+            session.getAttribute("dateFinAncienneCarte"));
         model.addAttribute("menuActif", "duplicata");
         model.addAttribute("etapeActuelle", 6);
         return "duplicata/etape6";
     }
 
-    @PostMapping("/etape6")
+   @PostMapping("/etape6")
     public String traiterEtape6(
-            @RequestParam String referenceAncienne,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebutAncienne,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFinAncienne,
+            @RequestParam(required = false) String referenceAncienne,
+            @RequestParam(required = false) String numeroPasseport,
+            @RequestParam(required = false)
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                LocalDate dateDebutAncienne,
+            @RequestParam(required = false)
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                LocalDate dateFinAncienne,
+            @RequestParam(required = false)
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                LocalDate dateDelivrance,
+            @RequestParam(required = false)
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                LocalDate dateExpiration,
+            @RequestParam(required = false) String paysDelivrance,
             HttpSession session,
             Model model) {
-        Map<String, String> erreurs = duplicataService.validerAncienneCarte(
-                referenceAncienne,
-                dateDebutAncienne,
-                dateFinAncienne);
+
+        String typeDemandeLibelle =
+            (String) session.getAttribute("typeDemandeLibelle");
+
+        if ("Transfert de visa".equals(typeDemandeLibelle)) {
+            Map<String, String> erreurs =
+                transfertService.validerNouveauPasseport(
+                    numeroPasseport, dateDelivrance,
+                    dateExpiration, paysDelivrance);
+            if (!erreurs.isEmpty()) {
+                model.addAttribute("erreurs", erreurs);
+                model.addAttribute("menuActif", "renouvellement");
+                model.addAttribute("etapeActuelle", 6);
+                return "transfert/etape6_nouveau_passeport";
+            }
+            session.setAttribute("nouveauNumeroPasseport", numeroPasseport);
+            session.setAttribute("nouvelleDateDelivrance", dateDelivrance);
+            session.setAttribute("nouvelleDateExpiration", dateExpiration);
+            session.setAttribute("nouveauPaysDelivrance", paysDelivrance);
+            return "redirect:/duplicata/resume";
+        }
+
+        // Duplicata — comportement existant
+        Map<String, String> erreurs =
+            duplicataService.validerAncienneCarte(
+                referenceAncienne, dateDebutAncienne, dateFinAncienne);
         if (!erreurs.isEmpty()) {
             model.addAttribute("erreurs", erreurs);
             model.addAttribute("menuActif", "duplicata");
             model.addAttribute("etapeActuelle", 6);
             return "duplicata/etape6";
         }
-
         session.setAttribute("referenceAncienneCarte", referenceAncienne);
         session.setAttribute("dateDebutAncienneCarte", dateDebutAncienne);
         session.setAttribute("dateFinAncienneCarte", dateFinAncienne);
         return "redirect:/duplicata/resume";
     }
-
+    
     @GetMapping("/resume")
     public String resume(HttpSession session, Model model) {
         Integer idDemande = (Integer) session.getAttribute("idDemandeNouveauTitre");
@@ -515,40 +634,74 @@ public class DuplicataController {
 
     @PostMapping("/confirmer")
     public String confirmer(HttpSession session, Model model) {
-        Integer idDemande = (Integer) session.getAttribute("idDemandeNouveauTitre");
-        Integer idPasseport = (Integer) session.getAttribute("idPasseportSauvegarde");
+        String typeDemandeLibelle =
+            (String) session.getAttribute("typeDemandeLibelle");
+        Integer idDemande =
+            (Integer) session.getAttribute("idDemandeNouveauTitre");
+        Integer idPasseport =
+            (Integer) session.getAttribute("idPasseportSauvegarde");
+
+        // ← Divergence finale
+        if ("Transfert de visa".equals(typeDemandeLibelle)) {
+            try {
+                Visa ancienVisa = transfertService.insererAncienVisa(
+                    idDemande,
+                    idPasseport,
+                    (String) session.getAttribute("referenceAncienVisa"),
+                    (LocalDate) session.getAttribute("dateDebutAncienVisa"),
+                    (LocalDate) session.getAttribute("dateFinAncienVisa"));
+
+                Demande nouvelleDemande = transfertService.finaliserTransfert(
+                    idDemande,
+                    ancienVisa,
+                    (String) session.getAttribute("nouveauNumeroPasseport"),
+                    (LocalDate) session.getAttribute("nouvelleDateDelivrance"),
+                    (LocalDate) session.getAttribute("nouvelleDateExpiration"),
+                    (String) session.getAttribute("nouveauPaysDelivrance"));
+
+                log.info("Transfert finalise - origine={} nouvelle={}",
+                    idDemande, nouvelleDemande.getId());
+                session.invalidate();
+                return "redirect:/demande/confirmation/"
+                    + nouvelleDemande.getId();
+
+            } catch (Exception e) {
+                log.error("Erreur confirmation transfert idDemande={}",
+                    idDemande, e);
+                model.addAttribute("erreur",
+                    "Erreur lors de la confirmation : " + e.getMessage());
+                return "transfert/etape6_nouveau_passeport";
+            }
+        }
+
+        // Duplicata — comportement existant inchangé
         Integer typeVisaId = (Integer) session.getAttribute("typeVisaId");
         LocalDate dateDemande = (LocalDate) session.getAttribute("dateDemande");
-
         try {
             CarteResident nouvelleCartePhase1 = duplicataService.finaliserPhase1(
-                    idDemande,
-                    idPasseport,
-                    (String) session.getAttribute("referenceNouveauTitre"),
-                    (LocalDate) session.getAttribute("dateDebutNouveauTitre"),
-                    (LocalDate) session.getAttribute("dateFinNouveauTitre"));
+                idDemande, idPasseport,
+                (String) session.getAttribute("referenceNouveauTitre"),
+                (LocalDate) session.getAttribute("dateDebutNouveauTitre"),
+                (LocalDate) session.getAttribute("dateFinNouveauTitre"));
 
             duplicataService.enregistrerAncienneCarte(
-                    idDemande,
-                    idPasseport,
-                    (String) session.getAttribute("referenceAncienneCarte"),
-                    (LocalDate) session.getAttribute("dateDebutAncienneCarte"),
-                    (LocalDate) session.getAttribute("dateFinAncienneCarte"));
+                idDemande, idPasseport,
+                (String) session.getAttribute("referenceAncienneCarte"),
+                (LocalDate) session.getAttribute("dateDebutAncienneCarte"),
+                (LocalDate) session.getAttribute("dateFinAncienneCarte"));
 
             Demande demandeDuplicata = duplicataService.finaliserPhase3(
-                    idDemande,
-                    idPasseport,
-                    typeVisaId,
-                    dateDemande);
+                idDemande, idPasseport, typeVisaId, dateDemande);
 
-            session.setAttribute("idDemandeliee", demandeDuplicata.getId());
-            log.info("Duplicata finalise - origine={} duplicata={} phase1Carte={}",
-                    idDemande, demandeDuplicata.getId(), nouvelleCartePhase1.getId());
+            log.info("Duplicata finalise - origine={} duplicata={}",
+                idDemande, demandeDuplicata.getId());
             session.invalidate();
             return "redirect:/demande/confirmation/" + demandeDuplicata.getId();
+
         } catch (Exception e) {
             log.error("Erreur confirmation duplicata idDemande={}", idDemande, e);
-            model.addAttribute("erreur", "Erreur lors de la confirmation : " + e.getMessage());
+            model.addAttribute("erreur",
+                "Erreur lors de la confirmation : " + e.getMessage());
             Demande demande = duplicataService.findDemandeById(idDemande);
             alimenterModeleResume(session, model, demande);
             model.addAttribute("menuActif", "duplicata");
