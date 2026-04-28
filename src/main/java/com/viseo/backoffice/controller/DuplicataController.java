@@ -624,10 +624,21 @@ public class DuplicataController {
     
     @GetMapping("/resume")
     public String resume(HttpSession session, Model model) {
-        Integer idDemande = (Integer) session.getAttribute("idDemandeNouveauTitre");
+        Integer idDemande =
+            (Integer) session.getAttribute("idDemandeNouveauTitre");
         Demande demande = duplicataService.findDemandeById(idDemande);
         alimenterModeleResume(session, model, demande);
-        model.addAttribute("menuActif", "duplicata");
+
+        String typeDemandeLibelle =
+            (String) session.getAttribute("typeDemandeLibelle");
+
+        if ("Transfert de visa".equals(typeDemandeLibelle)) {
+            model.addAttribute("menuActif", "renouvellement");
+        } else {
+            model.addAttribute("menuActif", "duplicata");
+        }
+
+        model.addAttribute("typeDemandeLibelle", typeDemandeLibelle);
         model.addAttribute("etapeActuelle", 7);
         return "duplicata/resume";
     }
@@ -710,22 +721,52 @@ public class DuplicataController {
         }
     }
 
-    private void alimenterModeleResume(HttpSession session, Model model, Demande demande) {
-        List<PieceDemande> communes = duplicataService.findPiecesCommunesByDemande(demande);
-        List<PieceDemandeSpecifique> specifiques = duplicataService.findPiecesSpecifiquesByDemande(demande);
-        Map<Integer, UploadPiece> uploadsCommunes = duplicataService.getDerniersUploadsCommunes(communes);
-        Map<Integer, UploadPiece> uploadsSpecifiques = duplicataService.getDerniersUploadsSpecifiques(specifiques);
+    private void alimenterModeleResume(
+            HttpSession session, Model model, Demande demande) {
+
+        List<PieceDemande> communes =
+            duplicataService.findPiecesCommunesByDemande(demande);
+        List<PieceDemandeSpecifique> specifiques =
+            duplicataService.findPiecesSpecifiquesByDemande(demande);
+        Map<Integer, UploadPiece> uploadsCommunes =
+            duplicataService.getDerniersUploadsCommunes(communes);
+        Map<Integer, UploadPiece> uploadsSpecifiques =
+            duplicataService.getDerniersUploadsSpecifiques(specifiques);
 
         model.addAttribute("demande", demande);
         model.addAttribute("piecesCommunes", communes);
         model.addAttribute("piecesSpecifiques", specifiques);
         model.addAttribute("uploadsCommunes", uploadsCommunes);
         model.addAttribute("uploadsSpecifiques", uploadsSpecifiques);
-        model.addAttribute("referenceNouveauTitre", session.getAttribute("referenceNouveauTitre"));
-        model.addAttribute("dateDebutNouveauTitre", session.getAttribute("dateDebutNouveauTitre"));
-        model.addAttribute("dateFinNouveauTitre", session.getAttribute("dateFinNouveauTitre"));
-        model.addAttribute("referenceAncienneCarte", session.getAttribute("referenceAncienneCarte"));
-        model.addAttribute("dateDebutAncienneCarte", session.getAttribute("dateDebutAncienneCarte"));
-        model.addAttribute("dateFinAncienneCarte", session.getAttribute("dateFinAncienneCarte"));
+
+        // Données duplicata
+        model.addAttribute("referenceNouveauTitre",
+            session.getAttribute("referenceNouveauTitre"));
+        model.addAttribute("dateDebutNouveauTitre",
+            session.getAttribute("dateDebutNouveauTitre"));
+        model.addAttribute("dateFinNouveauTitre",
+            session.getAttribute("dateFinNouveauTitre"));
+        model.addAttribute("referenceAncienneCarte",
+            session.getAttribute("referenceAncienneCarte"));
+        model.addAttribute("dateDebutAncienneCarte",
+            session.getAttribute("dateDebutAncienneCarte"));
+        model.addAttribute("dateFinAncienneCarte",
+            session.getAttribute("dateFinAncienneCarte"));
+
+        // Données transfert
+        model.addAttribute("referenceAncienVisa",
+            session.getAttribute("referenceAncienVisa"));
+        model.addAttribute("dateDebutAncienVisa",
+            session.getAttribute("dateDebutAncienVisa"));
+        model.addAttribute("dateFinAncienVisa",
+            session.getAttribute("dateFinAncienVisa"));
+        model.addAttribute("nouveauNumeroPasseport",
+            session.getAttribute("nouveauNumeroPasseport"));
+        model.addAttribute("nouvelleDateDelivrance",
+            session.getAttribute("nouvelleDateDelivrance"));
+        model.addAttribute("nouvelleDateExpiration",
+            session.getAttribute("nouvelleDateExpiration"));
+        model.addAttribute("nouveauPaysDelivrance",
+            session.getAttribute("nouveauPaysDelivrance"));
     }
 }
