@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import com.viseo.backoffice.model.TypeDemande;
 import com.viseo.backoffice.repository.TypeDemandeRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class TypeDemandeService {
 
@@ -21,7 +23,22 @@ public class TypeDemandeService {
         return typeDemandeRepository.findAll();
     }
 
-    public Optional<TypeDemande> findById(Integer id) {
+    /**
+     * Retourne tous les types de demande sauf "Nouveau titre".
+     */
+    public List<TypeDemande> findAllSaufNouveauTitre() {
+        return typeDemandeRepository.findByLibelleNot("Nouveau titre");
+    }
+
+    /**
+     * Retourne un type de demande par id.
+     */
+    public TypeDemande findById(Integer id) {
+        return typeDemandeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Type de demande introuvable: " + id));
+    }
+
+    public Optional<TypeDemande> findOptionalById(Integer id) {
         return typeDemandeRepository.findById(id);
     }
 

@@ -489,7 +489,8 @@ textarea:focus {
 }
 
 .alert-succes,
-.alert-erreur {
+.alert-erreur,
+.alert-info {
     border-radius: 10px;
     padding: 0.7rem 0.9rem;
     margin-bottom: 0.9rem;
@@ -507,6 +508,27 @@ textarea:focus {
     background: #fdeaea;
     color: #b03a2e;
     border-color: #f4c8c6;
+}
+
+.alert-info {
+    background: #eaf3ff;
+    color: #1f4f82;
+    border-color: #c7dcf7;
+}
+
+.form-inline-card {
+    border: 1px solid var(--sand);
+    border-radius: 10px;
+    background: #faf8f2;
+    padding: 1rem;
+}
+
+.inline-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--noir);
+    font-size: 0.95rem;
 }
 
 @media (max-width: 900px) {

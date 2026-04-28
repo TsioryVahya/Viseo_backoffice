@@ -41,7 +41,7 @@ public class VisaController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Integer id, Model model) {
-        visaService.findById(id).ifPresent(entity -> model.addAttribute("entity", entity));
+        model.addAttribute("entity", visaService.findById(id));
         return "visas/detail";
     }
 

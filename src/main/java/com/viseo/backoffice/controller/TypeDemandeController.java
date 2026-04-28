@@ -41,7 +41,7 @@ public class TypeDemandeController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Integer id, Model model) {
-        typeDemandeService.findById(id).ifPresent(entity -> model.addAttribute("entity", entity));
+        model.addAttribute("entity", typeDemandeService.findById(id));
         return "types-demande/detail";
     }
 

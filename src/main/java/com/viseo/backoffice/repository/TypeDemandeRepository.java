@@ -25,6 +25,8 @@ public interface TypeDemandeRepository extends JpaRepository<TypeDemande, Intege
      */
     Optional<TypeDemande> findByLibelle(String libelle);
 
+    List<TypeDemande> findByLibelleNot(String libelle);
+
     /**
      * Recherche les types de demande par libellé contenant (insensible à la casse)
      * 
