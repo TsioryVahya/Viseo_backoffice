@@ -1,0 +1,14 @@
+com\viseo\backoffice\controller\DuplicataController.class
+com\viseo\backoffice\repository\DemandeLieeRepository.class
+com\viseo\backoffice\repository\StatutVisaRepository.class
+com\viseo\backoffice\controller\DemandeApiController.class
+com\viseo\backoffice\repository\StatutTitreTypeRepository.class
+com\viseo\backoffice\model\StatutVisa.class
+com\viseo\backoffice\model\DemandeLiee.class
+com\viseo\backoffice\model\StatutTitreType.class
+com\viseo\backoffice\service\DemandeLieeService.class
+com\viseo\backoffice\service\QRCodeService.class
+com\viseo\backoffice\service\DuplicataService.class
+com\viseo\backoffice\service\TransfertService.class
+com\viseo\backoffice\repository\StatutCarteResidentRepository.class
+com\viseo\backoffice\model\StatutCarteResident.class
