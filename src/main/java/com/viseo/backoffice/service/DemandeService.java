@@ -16,8 +16,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
+import com.viseo.backoffice.model.CarteResident;
 import com.viseo.backoffice.model.Demande;
 import com.viseo.backoffice.model.Demandeur;
 import com.viseo.backoffice.model.Nationalite;
@@ -31,10 +33,14 @@ import com.viseo.backoffice.model.TypeDemande;
 import com.viseo.backoffice.model.TypePieceCommune;
 import com.viseo.backoffice.model.TypePieceSpecifique;
 import com.viseo.backoffice.model.TypeVisa;
+import com.viseo.backoffice.model.Visa;
 import com.viseo.backoffice.model.VisaTransformable;
+import com.viseo.backoffice.repository.StatutDemandeRepository;
+import com.viseo.backoffice.repository.StatutDemandeTypeRepository;
 import com.viseo.backoffice.repository.DemandeRepository;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class DemandeService {
@@ -52,6 +58,8 @@ public class DemandeService {
     private static final String SESSION_AVERTISSEMENT_VISA = "avertissementVisa";
 
     private final DemandeRepository demandeRepository;
+    private final StatutDemandeRepository statutDemandeRepository;
+    private final StatutDemandeTypeRepository statutDemandeTypeRepository;
     private final NationaliteService nationaliteService;
     private final SituationFamilialeService situationFamilialeService;
     private final TypeVisaService typeVisaService;
@@ -68,6 +76,8 @@ public class DemandeService {
 
     public DemandeService(
             DemandeRepository demandeRepository,
+            StatutDemandeRepository statutDemandeRepository,
+            StatutDemandeTypeRepository statutDemandeTypeRepository,
             NationaliteService nationaliteService,
             SituationFamilialeService situationFamilialeService,
             TypeVisaService typeVisaService,
@@ -82,6 +92,8 @@ public class DemandeService {
             TypeDemandeService typeDemandeService,
             StatutDemandeTypeService statutDemandeTypeService) {
         this.demandeRepository = demandeRepository;
+        this.statutDemandeRepository = statutDemandeRepository;
+        this.statutDemandeTypeRepository = statutDemandeTypeRepository;
         this.nationaliteService = nationaliteService;
         this.situationFamilialeService = situationFamilialeService;
         this.typeVisaService = typeVisaService;
@@ -101,8 +113,58 @@ public class DemandeService {
         return demandeRepository.findAll();
     }
 
-    public Optional<Demande> findById(Integer id) {
+    public Demande findById(Integer id) {
+        return demandeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Demande introuvable: " + id));
+    }
+
+    public Optional<Demande> findOptionalById(Integer id) {
         return demandeRepository.findById(id);
+    }
+
+    public Demande findByVisa(Visa visa) {
+        if (visa == null || visa.getDemande() == null || visa.getDemande().getId() == null) {
+            throw new EntityNotFoundException("Demande introuvable pour le visa.");
+        }
+        return findById(visa.getDemande().getId());
+    }
+
+    public Demande findByCarteResident(CarteResident carte) {
+        if (carte == null || carte.getDemande() == null || carte.getDemande().getId() == null) {
+            throw new EntityNotFoundException("Demande introuvable pour la carte de resident.");
+        }
+        return findById(carte.getDemande().getId());
+    }
+
+    @Transactional
+    public Demande creerDemandeDepuisOrigine(
+            Demande demandeOrigine,
+            LocalDate nouvelleDateDemande,
+            Integer nouveauIdTypeDemande,
+            Integer idStatutInitial) {
+        TypeDemande nouveauTypeDemande = typeDemandeService.findById(nouveauIdTypeDemande);
+
+        Demande nouvelleDemande = new Demande();
+        nouvelleDemande.setVisaTransformable(demandeOrigine.getVisaTransformable());
+        nouvelleDemande.setDateDemande(nouvelleDateDemande);
+        nouvelleDemande.setDemandeur(demandeOrigine.getDemandeur());
+        nouvelleDemande.setTypeVisa(demandeOrigine.getTypeVisa());
+        nouvelleDemande.setTypeDemande(nouveauTypeDemande);
+
+        Demande demandeSauvegardee = demandeRepository.save(nouvelleDemande);
+        changerStatut(demandeSauvegardee, idStatutInitial);
+        return demandeSauvegardee;
+    }
+
+    public void changerStatut(Demande demande, Integer idStatutType) {
+        StatutDemandeType statutType = statutDemandeTypeRepository.findById(idStatutType)
+                .orElseThrow(() -> new EntityNotFoundException("Statut de demande introuvable: " + idStatutType));
+
+        StatutDemande statut = new StatutDemande();
+        statut.setDemande(demande);
+        statut.setStatutDemandeType(statutType);
+        statut.setDateChangement(LocalDateTime.now());
+        statutDemandeRepository.save(statut);
     }
 
     public Demande save(Demande entity) {
@@ -523,7 +585,7 @@ public class DemandeService {
         Map<Integer, Boolean> piecesSpecifiquesSelection = lireMapSession(session, SESSION_PIECES_SPECIFIQUES);
 
         Optional<TypeVisa> typeVisa = typeVisaService.findById(typeVisaId);
-        Optional<TypeDemande> typeDemande = typeDemandeService.findById(1);
+        Optional<TypeDemande> typeDemande = typeDemandeService.findOptionalById(1);
         Optional<StatutDemandeType> statutDemandeType = statutDemandeTypeService.findById(1);
 
         Map<String, String> erreurs = new HashMap<>();

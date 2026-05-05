@@ -81,6 +81,7 @@ a {
 
 .nav-groupe {
     position: relative;
+    width: 100%;
 }
 
 .nav-groupe-label {
@@ -100,16 +101,14 @@ a {
 
 .sous-menu {
     display: none;
-    position: absolute;
-    top: 0;
-    left: calc(100% + 10px);
-    min-width: 180px;
+    position: static;
+    width: 100%;
+    margin-top: 0.25rem;
+    padding: 0.35rem 0 0.1rem 0.5rem;
     background: #2f4a35;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 10px;
-    padding: 0.35rem;
+    border-left: 2px solid rgba(255, 255, 255, 0.16);
+    border-radius: 0;
     z-index: 20;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
 }
 
 .nav-groupe:hover .sous-menu {
@@ -122,6 +121,7 @@ a {
     text-decoration: none;
     border-radius: 8px;
     padding: 0.5rem 0.65rem;
+    margin-top: 0.2rem;
 }
 
 .sous-menu a:hover,

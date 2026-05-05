@@ -41,7 +41,7 @@ public class CarteResidentController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Integer id, Model model) {
-        carteResidentService.findById(id).ifPresent(entity -> model.addAttribute("entity", entity));
+        model.addAttribute("entity", carteResidentService.findById(id));
         return "cartes-resident/detail";
     }
 

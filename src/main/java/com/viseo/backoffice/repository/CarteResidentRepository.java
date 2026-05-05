@@ -14,6 +14,8 @@ public interface CarteResidentRepository extends JpaRepository<CarteResident, In
 
     Optional<CarteResident> findById(Integer id);
 
+    Optional<CarteResident> findByReference(String reference);
+
     Optional<CarteResident> findFirstByPasseport_DemandeurOrderByDateFinDesc(Demandeur demandeur);
 
     CarteResident save(CarteResident entity);

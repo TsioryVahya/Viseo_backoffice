@@ -14,6 +14,8 @@ public interface VisaRepository extends JpaRepository<Visa, Integer> {
 
     Optional<Visa> findById(Integer id);
 
+    Optional<Visa> findByReference(String reference);
+
     Optional<Visa> findFirstByPasseport_DemandeurOrderByDateFinDesc(Demandeur demandeur);
 
     Visa save(Visa entity);

@@ -1,5 +1,5 @@
 -- =============================================
--- BASE DE DONNÉES VISA - PostgreSQL
+-- BASE DE DONNeES VISA - PostgreSQL
 -- =============================================
 
 CREATE TABLE Nationalite (
@@ -100,7 +100,7 @@ CREATE TABLE Type_piece_specifique (
 );
 
 -- =============================================
--- PIECE_DEMANDE — modifiée
+-- PIECE_DEMANDE — modifiee
 -- =============================================
 CREATE TABLE Piece_demande (
     id SERIAL PRIMARY KEY,
@@ -114,7 +114,7 @@ CREATE TABLE Piece_demande (
 );
 
 -- =============================================
--- PIECE_DEMANDE_SPECIFIQUE — modifiée
+-- PIECE_DEMANDE_SPECIFIQUE — modifiee
 -- =============================================
 CREATE TABLE Piece_demande_specifique (
     id SERIAL PRIMARY KEY,
@@ -126,6 +126,7 @@ CREATE TABLE Piece_demande_specifique (
     FOREIGN KEY (id_type_piece) REFERENCES Type_piece_specifique(id),
     UNIQUE (id_demande, id_type_piece)
 );
+
 
 -- =============================================
 -- UPLOAD_PIECE — nouvelle table
@@ -148,6 +149,7 @@ CREATE TABLE Upload_piece (
             (id_piece_demande IS NULL AND id_piece_demande_specifique IS NOT NULL)
         )
 );
+
 CREATE TABLE Visa (
     id SERIAL PRIMARY KEY,
     id_demande INT NOT NULL,
@@ -170,47 +172,91 @@ CREATE TABLE carte_resident (
     FOREIGN KEY (id_passeport) REFERENCES Passeport(id)
 );
 
+-- Type de statut (partage entre Visa et CarteResident)
+CREATE TABLE Statut_titre_type (
+    id SERIAL PRIMARY KEY,
+    libelle VARCHAR(100) NOT NULL,
+    description TEXT
+);
+
+-- Historique statut Visa
+CREATE TABLE Statut_visa (
+    id SERIAL PRIMARY KEY,
+    id_visa INT NOT NULL,
+    id_statut_type INT NOT NULL,
+    date_changement TIMESTAMP DEFAULT NOW(),
+    commentaire TEXT,
+    FOREIGN KEY (id_visa) REFERENCES Visa(id),
+    FOREIGN KEY (id_statut_type) REFERENCES Statut_titre_type(id)
+);
+
+-- Historique statut CarteResident
+CREATE TABLE Statut_carte_resident (
+    id SERIAL PRIMARY KEY,
+    id_carte_resident INT NOT NULL,
+    id_statut_type INT NOT NULL,
+    date_changement TIMESTAMP DEFAULT NOW(),
+    commentaire TEXT,
+    FOREIGN KEY (id_carte_resident) REFERENCES carte_resident(id),
+    FOREIGN KEY (id_statut_type) REFERENCES Statut_titre_type(id)
+);
+
+CREATE TABLE Demande_liee (
+    id SERIAL PRIMARY KEY,
+    id_demande_origine INT NOT NULL,
+    id_demande_liee INT NOT NULL,
+    type_lien VARCHAR(50) NOT NULL,
+    CONSTRAINT check_type_lien
+        CHECK (type_lien IN ('duplicata', 'transfert')),
+    FOREIGN KEY (id_demande_origine)
+        REFERENCES Demande(id),
+    FOREIGN KEY (id_demande_liee)
+        REFERENCES Demande(id),
+    UNIQUE (id_demande_liee)
+    -- Une demande liee ne peut avoir qu'une seule origine
+);
+
 -- =============================================
--- DONNÉES DE RÉFÉRENCE
+-- DONNeES DE ReFeRENCE
 -- =============================================
 
-INSERT INTO Nationalite (libelle) VALUES ('Française'), ('Malgache'), ('Chinoise'), ('Indienne'), ('Comorienne'), ('Autre');
+INSERT INTO Nationalite (libelle) VALUES ('Français'), ('Malagasy'), ('Chinois(e)'), ('Indien(ne)'), ('Autre');
 
-INSERT INTO Situation_familiale (libelle) VALUES ('Célibataire'), ('Marié(e)'), ('Divorcé(e)'), ('Veuf/Veuve');
+INSERT INTO Situation_familiale (libelle) VALUES ('Celibataire'), ('Marie(e)'), ('Divorce(e)'), ('Veuf/Veuve');
 
 INSERT INTO type_visa (libelle) VALUES ('Investisseur'), ('Travailleur');
 
 INSERT INTO Type_demande (libelle) VALUES ('Nouveau titre'), ('Duplicata'), ('Transfert de visa');
 
-INSERT INTO Statut_demande_type (libelle, description) VALUES
-('Dossier creer', 'Demande soumise, en attente de traitement'),
-('Pieces manquantes', 'Demande suspendue, des pièces sont manquantes ou invalides'),
-('Scan terminer', 'Demande approuvée, titre en cours de préparation'),
-('Rejetée', 'Demande rejetée'),
-('Titre délivré', 'Le titre a été remis au demandeur');
+
+INSERT INTO Statut_titre_type (libelle, description) VALUES
+('Actif',    'Titre en cours de validite'),
+('Expire',   'Titre dont la date de fin est depassee'),
+('Passeport expire',   'Titre dont le passeport associe est expire'),
+('Annule',   'Titre annule par les autorites'),
+('Perdu',    'Titre declare perdu par le demandeur');
+
+INSERT INTO Statut_demande_type (id, libelle, description) VALUES
+(1, 'Dossier cree', 'Demande soumise, en attente de traitement'),
+(2, 'Pieces manquantes', 'Demande suspendue, des pieces sont manquantes ou invalides'),
+(3, 'Scan termine', 'Scan des pieces termine'),
+(4, 'Rejetee', 'Demande rejetee'),
+(5, 'Titre delivre', 'Le titre a ete remis au demandeur'),
+(6, 'Validee', 'Demande validee par les agents'),
+(7, 'En cours de saisie', 'Demande initialisee et en cours de saisie');
 
 INSERT INTO Type_piece_commune (libelle, obligatoire) VALUES
-('02 photos d''identité récentes', TRUE),
+('02 photos d''identite recentes', TRUE),
 ('Notice de renseignement', TRUE),
-('Demande écrite adressée au Ministère de l''Intérieur', TRUE),
-('Photocopie certifiée de la première page du passeport', TRUE),
-('Certificat de résidence ou attestation d''hébergement', TRUE),
+('Demande ecrite adressee au Ministere de l''Interieur', TRUE),
+('Photocopie certifiee de la premiere page du passeport', TRUE),
+('Certificat de residence ou attestation d''hebergement', TRUE),
 ('Extrait de casier judiciaire (< 3 mois)', TRUE);
 
 INSERT INTO Type_piece_specifique (libelle, id_type_visa, obligatoire) VALUES
-('Statut de la Société', 1, TRUE),
+('Statut de la Societe', 1, TRUE),
 ('Extrait d''inscription au registre de commerce', 1, TRUE),
 ('Carte fiscale', 1, TRUE),
 ('Contrat de travail', 2, TRUE),
 ('Autorisation de travail', 2, TRUE);
-
--- =============================================
--- DONNÉES DE TEST - DEMANDEURS
--- =============================================
-
-INSERT INTO Demandeur (nom, prenom, date_naissance, lieu_naissance, telephone, email, adresse, id_situation_familiale, id_nationalite)
-VALUES ('Dupont', 'Sophie', '1988-03-22', 'Lyon', '0612345678', 'sophie.dupont@email.com', '456 Avenue de la Liberté, Lyon', 1, 1);
-
-INSERT INTO Demandeur (nom, prenom, date_naissance, lieu_naissance, telephone, email, adresse, id_situation_familiale, id_nationalite)
-VALUES ('Martin', 'Sophie', '1990-07-15', 'Marseille', '0623456789', 'sophie.martin@email.com', '789 Boulevard de la Mer, Marseille', 2, 1);
 
