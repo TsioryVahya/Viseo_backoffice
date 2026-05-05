@@ -795,4 +795,33 @@ public class DemandeService {
         }
         return true;
     }
+
+    public List<Demande> searchDemandes(String query) {
+        try {
+            Integer id = Integer.parseInt(query);
+            Optional<Demande> optionalDemande = demandeRepository.findById(id);
+            if (optionalDemande.isPresent()) {
+                Demande searched = optionalDemande.get();
+                List<Demande> allFromDemandeur = demandeRepository.findByDemandeurId(searched.getDemandeur().getId());
+                
+                // Sort: Search ID first, then others by date descending
+                List<Demande> result = new ArrayList<>();
+                result.add(searched);
+                allFromDemandeur.stream()
+                    .filter(d -> !d.getId().equals(id))
+                    .sorted((d1, d2) -> d2.getDateDemande().compareTo(d1.getDateDemande()))
+                    .forEach(result::add);
+                return result;
+            }
+        } catch (NumberFormatException e) {
+            // Not an ID, try as Passport Number
+        }
+
+        return passeportService.findByNumeroPasseport(query)
+            .map(p -> demandeRepository.findByDemandeurId(p.getDemandeur().getId())
+                .stream()
+                .sorted((d1, d2) -> d1.getDateDemande().compareTo(d2.getDateDemande()))
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
+    }
 }

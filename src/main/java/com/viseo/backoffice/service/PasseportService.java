@@ -32,4 +32,8 @@ public class PasseportService {
     public void deleteById(Integer id) {
         passeportRepository.deleteById(id);
     }
+
+    public Optional<Passeport> findByNumeroPasseport(String numeroPasseport) {
+        return passeportRepository.findByNumeroPasseport(numeroPasseport);
+    }
 }

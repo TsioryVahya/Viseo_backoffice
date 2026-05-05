@@ -21,6 +21,8 @@ public interface DemandeRepository extends JpaRepository<Demande, Integer> {
 
     void deleteById(Integer id);
 
+    List<Demande> findByDemandeurId(Integer demandeurId);
+
     @Query("""
         SELECT d FROM Demande d
         WHERE (

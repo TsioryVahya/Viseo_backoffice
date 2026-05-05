@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.viseo.backoffice.model.Demande;
 import com.viseo.backoffice.service.DemandeService;
 import com.viseo.backoffice.service.QRCodeService;
 
@@ -28,18 +30,15 @@ public class DemandeApiController {
     }
 
     @GetMapping
-    public List<Map<String, Object>> getAllDemandes() {
-        return demandeService.findAll().stream().map(d -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", d.getId());
-            map.put("date_demande", d.getDateDemande());
-            map.put("demandeur_nom", d.getDemandeur().getNom());
-            map.put("demandeur_prenom", d.getDemandeur().getPrenom());
-            map.put("type_visa", d.getTypeVisa().getLibelle());
-            map.put("type_demande", d.getTypeDemande().getLibelle());
-            map.put("statut", "Validee");
-            return map;
-        }).collect(Collectors.toList());
+    public List<Map<String, Object>> getAllDemandes(@RequestParam(required = false) String q) {
+        List<Demande> demandes;
+        if (q != null && !q.isEmpty()) {
+            demandes = demandeService.searchDemandes(q);
+        } else {
+            demandes = demandeService.findAll();
+        }
+        
+        return demandes.stream().map(this::mapDemandeToMap).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}/qr")
@@ -58,25 +57,39 @@ public class DemandeApiController {
 
     @GetMapping("/{id}")
     public Map<String, Object> getDemandeDetail(@PathVariable Integer id) {
-        return demandeService.findOptionalById(id).map(d -> {
-            Map<String, Object> detail = new HashMap<>();
-            detail.put("id", d.getId());
-            detail.put("date_demande", d.getDateDemande());
-            
-            Map<String, String> demandeur = new HashMap<>();
-            demandeur.put("nom", d.getDemandeur().getNom());
-            demandeur.put("prenom", d.getDemandeur().getPrenom());
-            demandeur.put("email", d.getDemandeur().getEmail());
-            demandeur.put("telephone", d.getDemandeur().getTelephone());
-            
-            detail.put("demandeur", demandeur);
-            detail.put("type_visa", d.getTypeVisa().getLibelle());
-            detail.put("type_demande", d.getTypeDemande().getLibelle());
-            return detail;
-        }).orElseGet(() -> {
+        return demandeService.findOptionalById(id).map(this::mapDemandeToDetailMap).orElseGet(() -> {
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Demande not found");
             return error;
         });
+    }
+
+    private Map<String, Object> mapDemandeToMap(Demande d) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", d.getId());
+        map.put("date_demande", d.getDateDemande());
+        map.put("demandeur_nom", d.getDemandeur().getNom());
+        map.put("demandeur_prenom", d.getDemandeur().getPrenom());
+        map.put("type_visa", d.getTypeVisa().getLibelle());
+        map.put("type_demande", d.getTypeDemande().getLibelle());
+        map.put("statut", "Validee");
+        return map;
+    }
+
+    private Map<String, Object> mapDemandeToDetailMap(Demande d) {
+        Map<String, Object> detail = new HashMap<>();
+        detail.put("id", d.getId());
+        detail.put("date_demande", d.getDateDemande());
+        
+        Map<String, String> demandeur = new HashMap<>();
+        demandeur.put("nom", d.getDemandeur().getNom());
+        demandeur.put("prenom", d.getDemandeur().getPrenom());
+        demandeur.put("email", d.getDemandeur().getEmail());
+        demandeur.put("telephone", d.getDemandeur().getTelephone());
+        
+        detail.put("demandeur", demandeur);
+        detail.put("type_visa", d.getTypeVisa().getLibelle());
+        detail.put("type_demande", d.getTypeDemande().getLibelle());
+        return detail;
     }
 }

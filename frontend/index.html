@@ -4,9 +4,51 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>Viseo Backoffice - Gestion des Visas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#3E5F44',
+              'primary-hover': '#2f4a35',
+              sand: '#F5F1E6',
+              'sand-dark': '#DDD6B9',
+              'sand-hover': '#e8e2d0',
+              noir: '#1a1a16',
+              gris: '#6b6b60',
+            }
+          }
+        }
+      }
+    </script>
+    <style type="text/tailwindcss">
+      @layer components {
+        .btn-primary {
+          @apply bg-primary text-white px-4 py-2 rounded-lg font-medium transition-all hover:bg-primary-hover active:scale-95 flex items-center gap-2;
+        }
+        .btn-secondary {
+          @apply bg-white border border-sand-dark text-primary px-4 py-2 rounded-lg font-medium transition-all hover:bg-sand active:scale-95 flex items-center gap-2;
+        }
+        .card {
+          @apply bg-white border border-sand-dark rounded-xl p-6 shadow-sm transition-all hover:shadow-md;
+        }
+        .badge {
+          @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider;
+        }
+        .badge-success { @apply bg-green-100 text-green-700 border border-green-200; }
+        .badge-warning { @apply bg-yellow-100 text-yellow-700 border border-yellow-200; }
+        .badge-danger { @apply bg-red-100 text-red-700 border border-red-200; }
+        .badge-info { @apply bg-blue-100 text-blue-700 border border-blue-200; }
+        
+        .resume-grid { @apply grid grid-cols-[200px,1fr] gap-x-6 gap-y-3; }
+        .resume-label { @apply text-gris text-sm; }
+        .resume-value { @apply text-noir font-semibold; }
+      }
+    </style>
   </head>
-  <body>
+  <body class="bg-sand text-noir antialiased font-sans">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

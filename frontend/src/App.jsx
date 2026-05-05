@@ -7,18 +7,15 @@ import './index.css';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen flex flex-col">
-        {/* Top border bar like the sidebar color */}
-        <div className="h-1 bg-[#3E5F44] w-full"></div>
-        
-        <main className="flex-1">
+      <div className="flex flex-col min-h-screen">
+        <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
           <Routes>
             <Route path="/" element={<DemandeList />} />
             <Route path="/demande/:id" element={<DemandeDetail />} />
           </Routes>
         </main>
-
-        <footer className="footer container">
+        
+        <footer className="py-8 text-center text-gris text-sm border-t border-sand-dark mt-auto bg-white/50">
           <p>© 2024 Viseo Backoffice - Système de Gestion des Visas</p>
         </footer>
       </div>
