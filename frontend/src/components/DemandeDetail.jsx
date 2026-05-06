@@ -78,45 +78,67 @@ const DemandeDetail = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <section className="bg-white border border-sand-dark rounded-2xl p-8 shadow-sm">
-            <h3 className="text-primary font-bold flex items-center gap-2 mb-8 pb-3 border-b border-sand">
-              <User size={18} />
-              Informations Personnelles
-            </h3>
-            <div className="space-y-6">
-              <div className="resume-grid">
-                <div className="resume-label">Nom complet</div>
-                <div className="resume-value uppercase tracking-tight">{demande.demandeur.nom}</div>
-                
-                <div className="resume-label">Prénom(s)</div>
-                <div className="resume-value">{demande.demandeur.prenom}</div>
-                
-                <div className="resume-label">Adresse Email</div>
-                <div className="resume-value text-sm font-mono lowercase break-all">{demande.demandeur.email}</div>
-                
-                <div className="resume-label">Téléphone</div>
-                <div className="resume-value">{demande.demandeur.telephone}</div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <section className="bg-white border border-sand-dark rounded-2xl p-8 shadow-sm">
+              <h3 className="text-primary font-bold flex items-center gap-2 mb-8 pb-3 border-b border-sand">
+                <User size={18} />
+                Informations Personnelles
+              </h3>
+              <div className="space-y-6">
+                <div className="resume-grid">
+                  <div className="resume-label">Nom complet</div>
+                  <div className="resume-value uppercase tracking-tight">{demande.demandeur.nom}</div>
+                  
+                  <div className="resume-label">Prénom(s)</div>
+                  <div className="resume-value">{demande.demandeur.prenom}</div>
+                  
+                  <div className="resume-label">Adresse Email</div>
+                  <div className="resume-value text-sm font-mono lowercase break-all">{demande.demandeur.email}</div>
+                  
+                  <div className="resume-label">Téléphone</div>
+                  <div className="resume-value">{demande.demandeur.telephone}</div>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+
+            <section className="bg-white border border-sand-dark rounded-2xl p-8 shadow-sm">
+              <h3 className="text-primary font-bold flex items-center gap-2 mb-8 pb-3 border-b border-sand">
+                <FileText size={18} />
+                Détails de la Demande
+              </h3>
+              <div className="space-y-6">
+                <div className="resume-grid">
+                  <div className="resume-label">Catégorie Visa</div>
+                  <div className="resume-value text-primary font-black">{demande.type_visa}</div>
+                  
+                  <div className="resume-label">Procédure</div>
+                  <div className="resume-value">{demande.type_demande}</div>
+                  
+                  <div className="resume-label">Date Soumission</div>
+                  <div className="resume-value">{new Date(demande.date_demande).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+                </div>
+              </div>
+            </section>
+          </div>
 
           <section className="bg-white border border-sand-dark rounded-2xl p-8 shadow-sm">
-            <h3 className="text-primary font-bold flex items-center gap-2 mb-8 pb-3 border-b border-sand">
-              <FileText size={18} />
-              Détails de la Demande
+            <h3 className="text-primary font-bold flex items-center gap-2 mb-6">
+              <Info size={18} />
+              Historique des Statuts
             </h3>
-            <div className="space-y-6">
-              <div className="resume-grid">
-                <div className="resume-label">Catégorie Visa</div>
-                <div className="resume-value text-primary font-black">{demande.type_visa}</div>
-                
-                <div className="resume-label">Procédure</div>
-                <div className="resume-value">{demande.type_demande}</div>
-                
-                <div className="resume-label">Date Soumission</div>
-                <div className="resume-value">{new Date(demande.date_demande).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-              </div>
+            <div className="space-y-4">
+              {demande.historique_statuts.map((statut, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <div className="w-8 h-8 flex-shrink-0 bg-sand rounded-full flex items-center justify-center mt-1">
+                    <CheckCircle size={16} className="text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-noir text-sm">{statut.statut}</p>
+                    <p className="text-gris text-xs font-mono">{new Date(statut.date).toLocaleString('fr-FR')}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         </div>

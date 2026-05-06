@@ -1,7 +1,9 @@
 package com.viseo.backoffice.model;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,7 +11,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.FetchType;
 
 @Entity
 @Table(name = "demande")
@@ -37,6 +42,11 @@ public class Demande {
     @ManyToOne
     @JoinColumn(name = "id_type_demande", nullable = false)
     private TypeDemande typeDemande;
+
+    @OneToMany(mappedBy = "demande", fetch = FetchType.EAGER)
+    @OrderBy("dateChangement ASC")
+    @JsonManagedReference
+    private List<StatutDemande> statuts;
 
     public Integer getId() {
         return id;
@@ -84,5 +94,13 @@ public class Demande {
 
     public void setTypeDemande(TypeDemande typeDemande) {
         this.typeDemande = typeDemande;
+    }
+
+    public List<StatutDemande> getStatuts() {
+        return statuts;
+    }
+
+    public void setStatuts(List<StatutDemande> statuts) {
+        this.statuts = statuts;
     }
 }

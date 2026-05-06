@@ -90,6 +90,15 @@ public class DemandeApiController {
         detail.put("demandeur", demandeur);
         detail.put("type_visa", d.getTypeVisa().getLibelle());
         detail.put("type_demande", d.getTypeDemande().getLibelle());
+
+        List<Map<String, Object>> statuts = d.getStatuts().stream().map(s -> {
+            Map<String, Object> statutMap = new HashMap<>();
+            statutMap.put("statut", s.getStatutDemandeType().getLibelle());
+            statutMap.put("date", s.getDateChangement());
+            return statutMap;
+        }).collect(Collectors.toList());
+        detail.put("historique_statuts", statuts);
+
         return detail;
     }
 }
